@@ -1,7 +1,7 @@
 // Test script to verify backend series filtering
 const axios = require('axios');
 
-const BACKEND_URL = 'http://3.144.196.75:8001';
+const BACKEND_URL = 'http://localhost:8001';
 const STUDY_UID = '1.2.840.113619.2.482.3.2831195393.851.1709524269.885';
 
 const SERIES = [

@@ -134,7 +134,7 @@ curl -X POST http://localhost:3001/api/orthanc/new-instance \
 docker exec redis-bridge redis-cli ping
 
 # Check main API connectivity
-curl http://3.144.196.75:8001/
+curl http://localhost:8001/
 ```
 
 ## Emergency Procedures

@@ -53,7 +53,7 @@ class AIDetectionService {
     if (import.meta.env && import.meta.env.DEV) {
       this.baseUrl = ''; // Use relative URLs for Vite proxy
     } else {
-      this.baseUrl = import.meta.env?.VITE_BACKEND_URL || 'http://3.144.196.75:8001';
+      this.baseUrl = import.meta.env?.VITE_BACKEND_URL || 'http://localhost:8001';
     }
   }
 

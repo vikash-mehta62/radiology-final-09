@@ -14,7 +14,7 @@ const getBackendUrl = (): string => {
   const backendUrl = (import.meta.env && import.meta.env.VITE_BACKEND_URL) ||
     (import.meta.env && import.meta.env.REACT_APP_BACKEND_URL) ||
     (typeof process !== 'undefined' && process.env && process.env.REACT_APP_BACKEND_URL) ||
-    'http://3.144.196.75:8001'
+    'http://localhost:8001'
 
   return backendUrl
 }

@@ -4,14 +4,14 @@
 
 ### 1. Check Environment Configuration
 ```bash
-curl http://3.144.196.75:8001/api/pacs/upload/config-check
+curl http://localhost:8001/api/pacs/upload/config-check
 ```
 
 This will show you if all required environment variables are set.
 
 ### 2. Test PACS Connection
 ```bash
-curl http://3.144.196.75:8001/api/pacs/upload/test
+curl http://localhost:8001/api/pacs/upload/test
 ```
 
 This will test if the server can connect to Orthanc PACS.
@@ -95,12 +95,12 @@ This should return Orthanc system information if it's running.
 **Solutions**:
 1. Check if study exists in database:
    ```bash
-   curl http://3.144.196.75:8001/api/dicom/studies
+   curl http://localhost:8001/api/dicom/studies
    ```
 
 2. Check if instances were created:
    ```bash
-   curl http://3.144.196.75:8001/api/pacs/debug/{studyUID}
+   curl http://localhost:8001/api/pacs/debug/{studyUID}
    ```
 
 3. Verify Orthanc has the instances:
@@ -149,7 +149,7 @@ Optional but recommended:
 
 ### Using cURL:
 ```bash
-curl -X POST http://3.144.196.75:8001/api/pacs/upload \
+curl -X POST http://localhost:8001/api/pacs/upload \
   -F "dicom=@/path/to/your/file.dcm" \
   -H "Content-Type: multipart/form-data"
 ```
@@ -201,10 +201,10 @@ If issues persist:
 1. **Collect diagnostic information**:
    ```bash
    # Environment check
-   curl http://3.144.196.75:8001/api/pacs/upload/config-check > config-check.json
+   curl http://localhost:8001/api/pacs/upload/config-check > config-check.json
    
    # Connection test
-   curl http://3.144.196.75:8001/api/pacs/upload/test > connection-test.json
+   curl http://localhost:8001/api/pacs/upload/test > connection-test.json
    
    # Orthanc status
    curl http://69.62.70.102:8042/system > orthanc-status.json

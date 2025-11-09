@@ -114,10 +114,10 @@ socket.on('notification_escalated', (data) => {
 Add to `viewer/.env`:
 ```env
 # WebSocket URL (optional, defaults to API URL or current host)
-VITE_WS_URL=http://3.144.196.75:8001
+VITE_WS_URL=http://localhost:8001
 
 # API URL (used as fallback for WebSocket URL)
-VITE_API_URL=http://3.144.196.75:8001/api
+VITE_API_URL=http://localhost:8001/api
 ```
 
 ### Server Configuration
@@ -311,7 +311,7 @@ describe('WebSocket Integration', () => {
 
 3. Verify server is running and WebSocket enabled:
    ```bash
-   curl http://3.144.196.75:8001/socket.io/
+   curl http://localhost:8001/socket.io/
    ```
 
 4. Check authentication token:

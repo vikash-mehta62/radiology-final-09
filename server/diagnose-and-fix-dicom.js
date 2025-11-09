@@ -16,7 +16,7 @@ const FormData = require('form-data');
 
 const ZIP_FILE_DEFAULT = path.join(__dirname, '..', 'DICOM.zip');
 const PATIENT_ID = '68dec98fd2f2b2311acc61c8';
-const API_URL = 'http://3.144.196.75:8001/api/dicom/upload/zip';
+const API_URL = 'http://localhost:8001/api/dicom/upload/zip';
 
 console.log('');
 console.log('========================================');

@@ -55,7 +55,7 @@ class SessionService {
       this.baseURL = `${trimmed}/auth`
     } else {
       if (!env.DEV) {
-        this.baseURL = 'http://3.144.196.75:8001/auth'
+        this.baseURL = 'http://localhost:8001/auth'
       } else {
         this.baseURL = '/auth'
       }

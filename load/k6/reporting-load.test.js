@@ -38,7 +38,7 @@ export const options = {
 
 // Base URL from environment or default
 const BASE_URL = __ENV.BASE_URL || 'http://localhost:5173';
-const API_URL = __ENV.API_URL || 'http://3.144.196.75:8001';
+const API_URL = __ENV.API_URL || 'http://localhost:8001';
 
 // Mock auth token
 const AUTH_TOKEN = __ENV.AUTH_TOKEN || 'test-token-12345';

@@ -8,7 +8,7 @@ const FormData = require('form-data');
 const fs = require('fs');
 
 const ORTHANC_URL = 'http://69.62.70.102:8042';
-const APP_URL = 'http://3.144.196.75:8001';
+const APP_URL = 'http://localhost:8001';
 const ORTHANC_USER = 'orthanc';
 const ORTHANC_PASS = 'orthanc';
 

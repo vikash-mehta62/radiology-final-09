@@ -198,7 +198,7 @@ console.log('══════════════════════�
 console.log(`✅ Generated ${generatedFrames} frames`);
 console.log('');
 console.log('Test URLs:');
-console.log(`Frame 0: http://3.144.196.75:8001/api/dicom/studies/${studyUID}/frames/0`);
-console.log(`Frame 1: http://3.144.196.75:8001/api/dicom/studies/${studyUID}/frames/1`);
-console.log(`Frame 2: http://3.144.196.75:8001/api/dicom/studies/${studyUID}/frames/2`);
+console.log(`Frame 0: http://localhost:8001/api/dicom/studies/${studyUID}/frames/0`);
+console.log(`Frame 1: http://localhost:8001/api/dicom/studies/${studyUID}/frames/1`);
+console.log(`Frame 2: http://localhost:8001/api/dicom/studies/${studyUID}/frames/2`);
 console.log('');

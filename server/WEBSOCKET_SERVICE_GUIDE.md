@@ -75,7 +75,7 @@ import { io } from 'socket.io-client';
 const token = localStorage.getItem('accessToken');
 
 // Connect to WebSocket server
-const socket = io('http://3.144.196.75:8001', {
+const socket = io('http://localhost:8001', {
   auth: {
     token: token
   },

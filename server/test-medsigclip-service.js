@@ -47,7 +47,7 @@ medSigLIPService.testConnection()
       console.log('\n🎉 Ready to classify medical images!');
       console.log('\n💡 Next steps:');
       console.log('   1. Start backend: npm start');
-      console.log('   2. Test API: curl http://3.144.196.75:8001/api/ai/test');
+      console.log('   2. Test API: curl http://localhost:8001/api/ai/test');
       console.log('   3. Use frontend to analyze images');
     } else {
       console.log('\n❌ FAILED: MedSigLIP connection failed');

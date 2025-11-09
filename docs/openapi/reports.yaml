@@ -8,7 +8,7 @@ info:
     email: team@example.com
 
 servers:
-  - url: http://3.144.196.75:8001/api/reports
+  - url: http://localhost:8001/api/reports
     description: Development server
   - url: https://api.example.com/api/reports
     description: Production server

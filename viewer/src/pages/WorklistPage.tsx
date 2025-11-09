@@ -76,7 +76,7 @@ const WorklistPage: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<string>('pending');
   const [autoRefresh, setAutoRefresh] = useState(true);
 
-  const API_URL = import.meta.env.VITE_API_URL || 'http://3.144.196.75:8001';
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8001';
 
   /**
    * Load studies from backend

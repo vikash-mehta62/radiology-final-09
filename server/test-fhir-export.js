@@ -5,7 +5,7 @@
 
 const axios = require('axios');
 
-const BASE_URL = 'http://3.144.196.75:8001';
+const BASE_URL = 'http://localhost:8001';
 
 // Get token from your login
 const TOKEN = process.env.TEST_TOKEN || 'YOUR_TOKEN_HERE';

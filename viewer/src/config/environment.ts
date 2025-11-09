@@ -87,8 +87,8 @@ const parseArray = (value: string | undefined, defaultValue: string[] = []): str
 export const getEnvironmentConfig = (): EnvironmentConfig => {
   return {
     // API Configuration
-    apiUrl: import.meta.env.VITE_API_URL || 'http://3.144.196.75:8001',
-    backendUrl: import.meta.env.VITE_BACKEND_URL || 'http://3.144.196.75:8001',
+    apiUrl: import.meta.env.VITE_API_URL || 'http://localhost:8001',
+    backendUrl: import.meta.env.VITE_BACKEND_URL || 'http://localhost:8001',
     appName: import.meta.env.VITE_APP_NAME || 'Medical Viewer',
 
     // Session Management (default: 30 minutes timeout, 5 minutes warning)

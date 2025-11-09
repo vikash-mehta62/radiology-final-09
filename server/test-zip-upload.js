@@ -82,7 +82,7 @@ async function testZipUpload(zipFilePath) {
   // Step 3: Check server availability
   log('\n3. Checking server availability...', 'blue');
   
-  const serverUrl = process.env.SERVER_URL || 'http://3.144.196.75:8001';
+  const serverUrl = process.env.SERVER_URL || 'http://localhost:8001';
   
   try {
     const healthCheck = await axios.get(`${serverUrl}/health`, { timeout: 5000 });

@@ -12,7 +12,7 @@ class HealthChecker {
       orthancUrl: config.orthancUrl || process.env.ORTHANC_URL || 'http://69.62.70.102:8042',
       orthancUsername: config.orthancUsername || process.env.ORTHANC_USERNAME || 'orthanc',
       orthancPassword: config.orthancPassword || process.env.ORTHANC_PASSWORD || 'orthanc',
-      webhookUrl: config.webhookUrl || process.env.WEBHOOK_URL || 'http://3.144.196.75:8001',
+      webhookUrl: config.webhookUrl || process.env.WEBHOOK_URL || 'http://localhost:8001',
       checkInterval: config.checkInterval || 30000, // 30 seconds
       timeout: config.timeout || 5000, // 5 seconds
       ...config

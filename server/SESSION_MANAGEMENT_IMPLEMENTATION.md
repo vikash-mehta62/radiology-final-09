@@ -251,20 +251,20 @@ To test the implementation:
 
 2. **Test login**:
    ```bash
-   curl -X POST http://3.144.196.75:8001/api/auth/login-session \
+   curl -X POST http://localhost:8001/api/auth/login-session \
      -H "Content-Type: application/json" \
      -d '{"username":"radiologist1","password":"password123"}'
    ```
 
 3. **Test session status**:
    ```bash
-   curl http://3.144.196.75:8001/api/auth/session-status \
+   curl http://localhost:8001/api/auth/session-status \
      -H "Authorization: Bearer <access_token>"
    ```
 
 4. **Test token refresh**:
    ```bash
-   curl -X POST http://3.144.196.75:8001/api/auth/refresh-token \
+   curl -X POST http://localhost:8001/api/auth/refresh-token \
      -H "Content-Type: application/json" \
      -d '{"refreshToken":"<refresh_token>"}'
    ```

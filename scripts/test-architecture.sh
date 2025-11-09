@@ -15,7 +15,7 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Configuration
-BACKEND_URL="http://3.144.196.75:8001"
+BACKEND_URL="http://localhost:8001"
 ORTHANC_URL="http://69.62.70.102:8042"
 STUDY_UID="1.3.6.1.4.1.16568.1759411668829.461370033" # Example study UID
 
