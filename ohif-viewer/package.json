@@ -1,0 +1,16 @@
+{
+  "name": "ohif-viewer-setup",
+  "version": "1.0.0",
+  "description": "OHIF Viewer setup for DICOM imaging",
+  "scripts": {
+    "docker:pull": "docker pull ohif/viewer:latest",
+    "docker:start": "docker-compose up -d",
+    "docker:stop": "docker-compose down",
+    "docker:logs": "docker-compose logs -f",
+    "install:source": "npx create-ohif-app@latest",
+    "dev": "npm run dev -- --port 3001"
+  },
+  "keywords": ["OHIF", "DICOM", "Medical Imaging"],
+  "author": "",
+  "license": "MIT"
+}

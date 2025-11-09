@@ -1,0 +1,375 @@
+{
+  "dashboard": {
+    "title": "Unified Reporting System",
+    "tags": ["reporting", "radiology", "production"],
+    "timezone": "browser",
+    "schemaVersion": 38,
+    "version": 1,
+    "refresh": "30s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "templating": {
+      "list": [
+        {
+          "name": "env",
+          "type": "query",
+          "label": "Environment",
+          "query": "label_values(autosave_attempt_total, env)",
+          "current": {
+            "text": "production",
+            "value": "production"
+          },
+          "multi": false,
+          "includeAll": false
+        },
+        {
+          "name": "service",
+          "type": "constant",
+          "label": "Service",
+          "query": "viewer",
+          "current": {
+            "text": "viewer",
+            "value": "viewer"
+          }
+        },
+        {
+          "name": "endpoint",
+          "type": "query",
+          "label": "API Endpoint",
+          "query": "label_values(api_request_total{service=\"$service\"}, endpoint)",
+          "current": {
+            "text": "All",
+            "value": "$__all"
+          },
+          "multi": true,
+          "includeAll": true
+        }
+      ]
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Autosave Success Rate (5m)",
+        "type": "gauge",
+        "gridPos": {"h": 8, "w": 6, "x": 0, "y": 0},
+        "targets": [
+          {
+            "expr": "autosave_success_rate:5m{env=\"$env\",service=\"$service\"}",
+            "legendFormat": "Success Rate"
+          }
+        ],
+        "options": {
+          "showThresholdLabels": true,
+          "showThresholdMarkers": true
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percentunit",
+            "min": 0,
+            "max": 1,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "red"},
+                {"value": 0.99, "color": "yellow"},
+                {"value": 0.995, "color": "green"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 2,
+        "title": "Autosave Success Rate Trend",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 10, "x": 6, "y": 0},
+        "targets": [
+          {
+            "expr": "autosave_success_rate:5m{env=\"$env\",service=\"$service\"}",
+            "legendFormat": "Success Rate"
+          },
+          {
+            "expr": "0.995",
+            "legendFormat": "SLO Target (99.5%)"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percentunit",
+            "min": 0.98,
+            "max": 1
+          }
+        }
+      },
+      {
+        "id": 3,
+        "title": "Error Budget Burn Rate",
+        "type": "stat",
+        "gridPos": {"h": 8, "w": 8, "x": 16, "y": 0},
+        "targets": [
+          {
+            "expr": "autosave_error_budget_burn:5m{env=\"$env\",service=\"$service\"}",
+            "legendFormat": "Burn Rate"
+          }
+        ],
+        "options": {
+          "colorMode": "background",
+          "graphMode": "area"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "green"},
+                {"value": 3, "color": "yellow"},
+                {"value": 10, "color": "red"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 4,
+        "title": "API Latency (p50 / p95)",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+        "targets": [
+          {
+            "expr": "api_latency:p50{env=\"$env\",service=\"$service\",endpoint=~\"$endpoint\"}",
+            "legendFormat": "p50 - {{endpoint}}"
+          },
+          {
+            "expr": "api_latency:p95{env=\"$env\",service=\"$service\",endpoint=~\"$endpoint\"}",
+            "legendFormat": "p95 - {{endpoint}}"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ms",
+            "min": 0
+          }
+        }
+      },
+      {
+        "id": 5,
+        "title": "Autosave Latency Distribution",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
+        "targets": [
+          {
+            "expr": "autosave_latency:p50{env=\"$env\",service=\"$service\"}",
+            "legendFormat": "p50"
+          },
+          {
+            "expr": "autosave_latency:p95{env=\"$env\",service=\"$service\"}",
+            "legendFormat": "p95"
+          },
+          {
+            "expr": "autosave_latency:p99{env=\"$env\",service=\"$service\"}",
+            "legendFormat": "p99"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ms",
+            "min": 0
+          }
+        }
+      },
+      {
+        "id": 6,
+        "title": "Version Conflicts per Minute",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 8, "x": 0, "y": 16},
+        "targets": [
+          {
+            "expr": "rate(version_conflict_total{env=\"$env\",service=\"$service\"}[5m]) * 60",
+            "legendFormat": "Conflicts/min"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "min": 0
+          }
+        }
+      },
+      {
+        "id": 7,
+        "title": "Finalize/Sign Throughput",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 8, "x": 8, "y": 16},
+        "targets": [
+          {
+            "expr": "report_finalize_rate:5m{env=\"$env\",service=\"$service\"} * 60",
+            "legendFormat": "Finalize/min"
+          },
+          {
+            "expr": "report_sign_rate:5m{env=\"$env\",service=\"$service\"} * 60",
+            "legendFormat": "Sign/min"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "min": 0
+          }
+        }
+      },
+      {
+        "id": 8,
+        "title": "Export Error Rate by Format",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 8, "x": 16, "y": 16},
+        "targets": [
+          {
+            "expr": "export_error_rate:5m{env=\"$env\",service=\"$service\"}",
+            "legendFormat": "{{format}}"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percentunit",
+            "min": 0,
+            "max": 0.1
+          }
+        }
+      },
+      {
+        "id": 9,
+        "title": "Online/Offline Sessions Trend",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 24},
+        "targets": [
+          {
+            "expr": "rate(network_online_total{env=\"$env\",service=\"$service\"}[5m]) * 60",
+            "legendFormat": "Online events/min"
+          },
+          {
+            "expr": "rate(network_offline_total{env=\"$env\",service=\"$service\"}[5m]) * 60",
+            "legendFormat": "Offline events/min"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "min": 0
+          }
+        }
+      },
+      {
+        "id": 10,
+        "title": "API Error Rate by Endpoint",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 24},
+        "targets": [
+          {
+            "expr": "api_error_rate:5m{env=\"$env\",service=\"$service\",endpoint=~\"$endpoint\"}",
+            "legendFormat": "{{endpoint}}"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percentunit",
+            "min": 0,
+            "max": 0.05
+          }
+        }
+      },
+      {
+        "id": 11,
+        "title": "Finalize Success Rate",
+        "type": "stat",
+        "gridPos": {"h": 4, "w": 6, "x": 0, "y": 32},
+        "targets": [
+          {
+            "expr": "report_finalize_success_rate:5m{env=\"$env\",service=\"$service\"}",
+            "legendFormat": "Success Rate"
+          }
+        ],
+        "options": {
+          "colorMode": "background"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percentunit",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "red"},
+                {"value": 0.99, "color": "yellow"},
+                {"value": 0.999, "color": "green"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 12,
+        "title": "Sign Success Rate",
+        "type": "stat",
+        "gridPos": {"h": 4, "w": 6, "x": 6, "y": 32},
+        "targets": [
+          {
+            "expr": "report_sign_success_rate:5m{env=\"$env\",service=\"$service\"}",
+            "legendFormat": "Success Rate"
+          }
+        ],
+        "options": {
+          "colorMode": "background"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percentunit",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "red"},
+                {"value": 0.99, "color": "yellow"},
+                {"value": 0.999, "color": "green"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 13,
+        "title": "Autosave Attempts per Minute",
+        "type": "stat",
+        "gridPos": {"h": 4, "w": 6, "x": 12, "y": 32},
+        "targets": [
+          {
+            "expr": "rate(autosave_attempt_total{env=\"$env\",service=\"$service\"}[5m]) * 60",
+            "legendFormat": "Attempts/min"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short"
+          }
+        }
+      },
+      {
+        "id": 14,
+        "title": "Active Reports (Editing)",
+        "type": "stat",
+        "gridPos": {"h": 4, "w": 6, "x": 18, "y": 32},
+        "targets": [
+          {
+            "expr": "count(rate(autosave_attempt_total{env=\"$env\",service=\"$service\"}[1m]) > 0)",
+            "legendFormat": "Active Reports"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short"
+          }
+        }
+      }
+    ]
+  }
+}

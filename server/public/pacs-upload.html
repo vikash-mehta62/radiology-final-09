@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PACS DICOM Upload - Real-time Processing</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .upload-area {
+            border: 2px dashed #007bff;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 20px;
+            background-color: #f8f9fa;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .upload-area:hover {
+            border-color: #0056b3;
+            background-color: #e3f2fd;
+        }
+
+        .upload-area.dragover {
+            border-color: #28a745;
+            background-color: #d4edda;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .upload-btn {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+            transition: background-color 0.3s;
+        }
+
+        .upload-btn:hover {
+            background-color: #0056b3;
+        }
+
+        .upload-btn:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background-color: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: #28a745;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+        }
+
+        .status.success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .status.error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .status.info {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+
+        .file-list {
+            margin: 20px 0;
+        }
+
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            margin: 5px 0;
+            background-color: #f8f9fa;
+        }
+
+        .connection-status {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .connected {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .disconnected {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .results {
+            margin-top: 30px;
+        }
+
+        .study-result {
+            background-color: #e3f2fd;
+            border: 1px solid #90caf9;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+
+        .view-link {
+            display: inline-block;
+            background-color: #28a745;
+            color: white;
+            padding: 8px 16px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+
+        .view-link:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🏥 PACS DICOM Upload</h1>
+        <p style="text-align: center; color: #666;">Upload DICOM files for real-time processing and immediate viewing
+        </p>
+
+        <div id="connectionStatus" class="connection-status">
+            <span id="statusText">Checking PACS connection...</span>
+        </div>
+
+        <div class="upload-area" id="uploadArea">
+            <div>
+                <h3>📁 Drop DICOM files here or click to browse</h3>
+                <p>Supported formats: .dcm, .dicom, .dic</p>
+                <p>Max file size: 500MB | Max files: 10</p>
+            </div>
+            <input type="file" id="fileInput" class="file-input" multiple accept=".dcm,.dicom,.dic,application/dicom">
+        </div>
+
+        <div class="file-list" id="fileList"></div>
+
+        <div style="text-align: center;">
+            <button class="upload-btn" id="uploadBtn" onclick="uploadFiles()" disabled>
+                📤 Upload to PACS
+            </button>
+            <button class="upload-btn" onclick="clearFiles()">
+                🗑️ Clear Files
+            </button>
+        </div>
+
+        <div class="progress-bar" id="progressBar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+
+        <div class="status" id="status"></div>
+
+        <div class="results" id="results"></div>
+    </div>
+
+    <script>
+        let selectedFiles = [];
+        let isUploading = false;
+
+        // Check PACS connection and configuration on load
+        window.onload = function () {
+            checkConfiguration();
+            checkConnection();
+        };
+
+        async function checkConfiguration() {
+            try {
+                const response = await fetch('/api/pacs/upload/config-check');
+                const result = await response.json();
+
+                if (!result.valid) {
+                    const statusEl = document.getElementById('connectionStatus');
+                    const statusText = document.getElementById('statusText');
+                    statusEl.className = 'connection-status disconnected';
+                    statusText.innerHTML = `❌ Configuration Error: ${result.errors.join(', ')}<br>` +
+                        `<small>Check your .env file for missing variables</small>`;
+
+                    // Disable upload
+                    document.getElementById('uploadArea').style.opacity = '0.5';
+                    document.getElementById('uploadArea').style.pointerEvents = 'none';
+                }
+            } catch (error) {
+                console.error('Configuration check failed:', error);
+            }
+        }
+
+        async function checkConnection() {
+            try {
+                const response = await fetch('/api/pacs/upload/test');
+                const result = await response.json();
+
+                const statusEl = document.getElementById('connectionStatus');
+                const statusText = document.getElementById('statusText');
+
+                if (result.success && result.data.connected) {
+                    statusEl.className = 'connection-status connected';
+                    statusText.textContent = '✅ PACS Connected - Ready for uploads';
+                } else {
+                    statusEl.className = 'connection-status disconnected';
+                    statusText.innerHTML = '❌ PACS Disconnected - Check Orthanc server<br>' +
+                        '<small>Make sure Orthanc is running on ' + (result.data?.orthancUrl || 'http://69.62.70.102:8042') + '</small>';
+                }
+            } catch (error) {
+                const statusEl = document.getElementById('connectionStatus');
+                const statusText = document.getElementById('statusText');
+                statusEl.className = 'connection-status disconnected';
+                statusText.innerHTML = '❌ Connection Error - ' + error.message + '<br>' +
+                    '<small>Check console for details</small>';
+            }
+        }
+
+        // File upload handling
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const fileList = document.getElementById('fileList');
+        const uploadBtn = document.getElementById('uploadBtn');
+
+        uploadArea.addEventListener('click', () => fileInput.click());
+        uploadArea.addEventListener('dragover', handleDragOver);
+        uploadArea.addEventListener('drop', handleDrop);
+        uploadArea.addEventListener('dragleave', handleDragLeave);
+        fileInput.addEventListener('change', handleFileSelect);
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        }
+
+        function handleDragLeave(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = Array.from(e.dataTransfer.files);
+            addFiles(files);
+        }
+
+        function handleFileSelect(e) {
+            const files = Array.from(e.target.files);
+            addFiles(files);
+        }
+
+        function addFiles(files) {
+            const dicomFiles = files.filter(file => {
+                const name = file.name.toLowerCase();
+                return name.endsWith('.dcm') || name.endsWith('.dicom') || name.endsWith('.dic') || file.type === 'application/dicom';
+            });
+
+            selectedFiles = [...selectedFiles, ...dicomFiles];
+            updateFileList();
+            updateUploadButton();
+        }
+
+        function updateFileList() {
+            fileList.innerHTML = '';
+            selectedFiles.forEach((file, index) => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                fileItem.innerHTML = `
+                    <span>📄 ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)</span>
+                    <button onclick="removeFile(${index})" style="background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;">Remove</button>
+                `;
+                fileList.appendChild(fileItem);
+            });
+        }
+
+        function removeFile(index) {
+            selectedFiles.splice(index, 1);
+            updateFileList();
+            updateUploadButton();
+        }
+
+        function clearFiles() {
+            selectedFiles = [];
+            fileInput.value = '';
+            updateFileList();
+            updateUploadButton();
+            hideStatus();
+        }
+
+        function updateUploadButton() {
+            uploadBtn.disabled = selectedFiles.length === 0 || isUploading;
+            uploadBtn.textContent = isUploading ? '⏳ Uploading...' : `📤 Upload ${selectedFiles.length} file(s) to PACS`;
+        }
+
+        async function uploadFiles() {
+            if (selectedFiles.length === 0 || isUploading) return;
+
+            isUploading = true;
+            updateUploadButton();
+            showProgress();
+            hideStatus();
+            clearResults();
+
+            try {
+                const formData = new FormData();
+                selectedFiles.forEach(file => {
+                    formData.append('dicom', file);
+                });
+
+                showStatus('Uploading files to PACS server...', 'info');
+
+                const response = await fetch('/api/pacs/upload/batch', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showStatus(`✅ Upload completed! ${result.data.successful} successful, ${result.data.failed} failed`, 'success');
+                    showResults(result.data);
+
+                    // Clear files after successful upload
+                    clearFiles();
+                } else {
+                    let errorMsg = `❌ Upload failed: ${result.message}`;
+                    if (result.errors && result.errors.length > 0) {
+                        errorMsg += '\n\nErrors:\n' + result.errors.join('\n');
+                    }
+                    if (result.hint) {
+                        errorMsg += '\n\nHint: ' + result.hint;
+                    }
+                    showStatus(errorMsg, 'error');
+                }
+
+            } catch (error) {
+                showStatus(`❌ Upload error: ${error.message}\n\nPlease check:\n- Orthanc server is running\n- Environment variables are configured\n- DICOM file is valid`, 'error');
+                console.error('Upload error details:', error);
+            } finally {
+                isUploading = false;
+                updateUploadButton();
+                hideProgress();
+            }
+        }
+
+        function showProgress() {
+            document.getElementById('progressBar').style.display = 'block';
+            // Simulate progress for now
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 10;
+                document.getElementById('progressFill').style.width = progress + '%';
+                if (progress >= 100) {
+                    clearInterval(interval);
+                }
+            }, 200);
+        }
+
+        function hideProgress() {
+            document.getElementById('progressBar').style.display = 'none';
+            document.getElementById('progressFill').style.width = '0%';
+        }
+
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = `status ${type}`;
+            status.style.display = 'block';
+        }
+
+        function hideStatus() {
+            document.getElementById('status').style.display = 'none';
+        }
+
+        function showResults(data) {
+            const results = document.getElementById('results');
+            results.innerHTML = '<h3>📊 Upload Results</h3>';
+
+            if (data.readyStudies && data.readyStudies.length > 0) {
+                data.readyStudies.forEach(study => {
+                    const studyDiv = document.createElement('div');
+                    studyDiv.className = 'study-result';
+                    studyDiv.innerHTML = `
+                        <h4>📋 Study: ${study.filename}</h4>
+                        <p><strong>Study UID:</strong> ${study.studyInstanceUID}</p>
+                        <p><strong>Total Frames:</strong> ${study.totalFrames}</p>
+                        <p><strong>Status:</strong> ✅ Ready for immediate viewing</p>
+                        <a href="/viewer?study=${study.studyInstanceUID}" class="view-link" target="_blank">
+                            👁️ View Study
+                        </a>
+                    `;
+                    results.appendChild(studyDiv);
+                });
+            }
+
+            if (data.failed > 0) {
+                const failedDiv = document.createElement('div');
+                failedDiv.innerHTML = `<p style="color: #721c24;">❌ ${data.failed} file(s) failed to upload</p>`;
+                results.appendChild(failedDiv);
+            }
+        }
+
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+    </script>
+</body>
+
+</html>

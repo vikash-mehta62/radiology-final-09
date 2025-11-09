@@ -1,0 +1,168 @@
+{
+  "Name": "ORTHANC_DEV_AE",
+  "DicomAet": "ORTHANC_DEV_AE",
+  "DicomPort": 4242,
+  "HttpPort": 8042,
+  
+  "RemoteAccessAllowed": true,
+  "AuthenticationEnabled": true,
+  "RegisteredUsers": {
+    "orthanc": "orthanc_secure_2024"
+  },
+  
+  "DicomWeb": {
+    "Enable": true,
+    "Root": "/dicom-web/",
+    "EnableWado": true,
+    "WadoRoot": "/wado",
+    "Ssl": false,
+    "Host": "0.0.0.0",
+    "Port": 8042
+  },
+  
+  "DicomModalities": {},
+  "OrthancPeers": {},
+  
+  "HttpVerbose": false,
+  "DicomVerbose": false,
+  
+  "StorageDirectory": "OrthancStorage",
+  "IndexDirectory": "OrthancDatabase",
+  
+  "StorageCompression": false,
+  "MaximumStorageSize": 0,
+  "MaximumPatientCount": 0,
+  
+  "DicomAssociationCloseDelay": 5,
+  "DicomScuTimeout": 10,
+  "DicomScpTimeout": 30,
+  
+  "HttpTimeout": 60,
+  "HttpRequestTimeout": 30,
+  
+  "UnknownSopClassAccepted": false,
+  "DicomCheckModalityHost": false,
+  
+  "DicomAlwaysAllowEcho": true,
+  "DicomAlwaysAllowFind": false,
+  "DicomAlwaysAllowMove": false,
+  "DicomAlwaysAllowGet": false,
+  "DicomAlwaysAllowStore": true,
+  
+  "DicomCheckCalledAet": false,
+  "DicomCheckCallingAet": false,
+  
+  "ExecuteLuaEnabled": false,
+  "HttpsVerifyPeers": true,
+  "HttpsCACertificates": "",
+  
+  "UserMetadata": {},
+  "DefaultEncoding": "Latin1",
+  "DeidentifyLogs": true,
+  "DeidentifyLogsDicomVersion": "2023b",
+  
+  "LoadPrivateDictionary": true,
+  "Dictionary": {},
+  
+  "SynchronousCMove": true,
+  "JobsHistorySize": 10,
+  "SaveJobs": true,
+  
+  "OverwriteInstances": false,
+  "MediaArchiveSize": 1,
+  
+  "StoreMD5ForAttachments": true,
+  
+  "LimitFindResults": 0,
+  "LimitFindInstances": 0,
+  
+  "LogExportedResources": false,
+  "KeepAlive": true,
+  "TcpNoDelay": true,
+  
+  "HttpThreadsCount": 50,
+  "HttpDescribeErrors": true,
+  
+  "HttpHeaders": {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization, Accept, X-Requested-With",
+    "Access-Control-Allow-Credentials": "true",
+    "Access-Control-Max-Age": "86400"
+  },
+  
+  "DicomTlsEnabled": false,
+  "DicomTlsCertificate": "",
+  "DicomTlsPrivateKey": "",
+  "DicomTlsTrustedCertificates": "",
+  "DicomTlsRemoteCertificateRequired": true,
+  
+  "HttpsCertificate": "",
+  "HttpsPrivateKey": "",
+  
+  "Plugins": [],
+  
+  "OnStoredInstance": [
+    "function OnStoredInstance(instanceId, tags, metadata, origin)",
+    "  -- Auto-sync to your application database",
+    "  -- Automatically processes files when uploaded to Orthanc",
+    "  local webhook_url = 'http://localhost:8001/api/orthanc/new-instance'",
+    "  local webhook_secret = 'webhook_secret_2024_change_in_prod'",
+    "  ",
+    "  -- Prepare payload with instance metadata",
+    "  local payload = {}",
+    "  payload['instanceId'] = instanceId",
+    "  payload['studyInstanceUID'] = tags['StudyInstanceUID']",
+    "  payload['seriesInstanceUID'] = tags['SeriesInstanceUID']",
+    "  payload['sopInstanceUID'] = tags['SOPInstanceUID']",
+    "  payload['patientID'] = tags['PatientID']",
+    "  payload['patientName'] = tags['PatientName']",
+    "  payload['modality'] = tags['Modality']",
+    "  payload['studyDate'] = tags['StudyDate']",
+    "  payload['origin'] = origin",
+    "  payload['timestamp'] = os.time()",
+    "  ",
+    "  -- Convert to JSON",
+    "  local json_payload = DumpJson(payload)",
+    "  ",
+    "  -- Calculate HMAC signature for security",
+    "  local signature = ComputeMD5(json_payload .. webhook_secret)",
+    "  ",
+    "  -- Send webhook (non-blocking)",
+    "  local headers = {}",
+    "  headers['Content-Type'] = 'application/json'",
+    "  headers['X-Orthanc-Signature'] = signature",
+    "  headers['X-Orthanc-Instance-Id'] = instanceId",
+    "  ",
+    "  -- Use RestApiPost for non-blocking call",
+    "  local success, response = pcall(function()",
+    "    return HttpPost(webhook_url, json_payload, headers)",
+    "  end)",
+    "  ",
+    "  if not success then",
+    "    print('Webhook failed for instance: ' .. instanceId .. ' - ' .. tostring(response))",
+    "  else",
+    "    print('Webhook sent for instance: ' .. instanceId)",
+    "  end",
+    "end"
+  ],
+  
+  "OnChange": [],
+  "OnDeletedPatient": [],
+  "OnDeletedStudy": [],
+  "OnDeletedSeries": [],
+  "OnDeletedInstance": [],
+  "OnStablePatient": [],
+  "OnStableStudy": [],
+  "OnStableSeries": [],
+  
+  "IncomingHttpRequestFilter": [],
+  "OutgoingHttpRequestFilter": [],
+  
+  "ReceivedInstanceFilter": [],
+  "IncomingFindRequestFilter": [],
+  "IncomingMoveRequestFilter": [],
+  "IncomingCStoreRequestFilter": [],
+  
+  "WorklistCallback": []
+}

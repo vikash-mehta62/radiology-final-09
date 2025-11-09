@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  ohif-viewer:
+    image: ohif/viewer:latest
+    container_name: ohif-viewer
+    ports:
+      - "3001:80"
+    volumes:
+      - ./public/config:/usr/share/nginx/html/config:ro
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+    networks:
+      - dicom-network
+
+networks:
+  dicom-network:
+    external: true

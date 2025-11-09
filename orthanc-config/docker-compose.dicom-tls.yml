@@ -1,0 +1,64 @@
+# Docker Compose override for DICOM-TLS configuration
+# Use with: docker-compose -f docker-compose.yml -f orthanc-config/docker-compose.dicom-tls.yml up
+
+version: '3.8'
+
+services:
+  # Orthanc with DICOM-TLS enabled
+  orthanc:
+    volumes:
+      # Mount TLS-enabled configuration
+      - ./orthanc-config/orthanc-tls.json:/etc/orthanc/orthanc.json:ro
+      # Mount DICOM-TLS certificates
+      - ./orthanc-config/certs:/etc/orthanc/certs:ro
+    environment:
+      # Override environment variables for TLS
+      - ORTHANC__NAME=ORTHANC_PROD_AE
+      - ORTHANC__DICOM_AET=ORTHANC_PROD_AE
+      - ORTHANC__DICOM_PORT=4242
+      - ORTHANC__HTTP_PORT=8042
+      # Enable TLS-specific settings
+      - ORTHANC__DICOM_TLS_ENABLED=true
+      - ORTHANC__HTTPS_ENABLED=true
+      # Security settings
+      - ORTHANC__AUTHENTICATION_ENABLED=true
+      - ORTHANC__REMOTE_ACCESS_ALLOWED=true
+      - ORTHANC__DICOM_CHECK_CALLED_AET=true
+      - ORTHANC__DICOM_CHECK_CALLING_AET=true
+      # Webhook secret from environment
+      - WEBHOOK_SECRET=${WEBHOOK_SECRET:-webhook_secret_2024_change_in_prod}
+    ports:
+      - "4242:4242"  # DICOM-TLS port
+      - "8042:8042"  # HTTPS web interface
+    healthcheck:
+      # Update health check to use HTTPS
+      test: ["CMD", "curl", "-k", "-f", "https://localhost:8042/system"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # Update bridge to use HTTPS webhook endpoint
+  dicom-bridge:
+    environment:
+      # Update Orthanc URL to use HTTPS
+      - ORTHANC_URL=https://orthanc:8042
+      # Update webhook URL to use HTTPS
+      - BRIDGE_URL=https://dicom-bridge:3000
+      # TLS verification settings
+      - NODE_TLS_REJECT_UNAUTHORIZED=0  # For self-signed certificates in development
+      - HTTPS_CA_CERT_PATH=/app/certs/dicom-ca-chain.crt
+    volumes:
+      # Mount CA certificate for TLS verification
+      - ./orthanc-config/certs:/app/certs:ro
+    healthcheck:
+      # Update health check to handle TLS
+      test: ["CMD", "curl", "-k", "-f", "https://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+# Additional volumes for certificate storage
+volumes:
+  orthanc-tls-certs:
+    driver: local

@@ -1,0 +1,372 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Orthanc Bridge - Alerts & Incidents",
+    "tags": ["orthanc", "bridge", "alerts", "incidents"],
+    "style": "dark",
+    "timezone": "browser",
+    "refresh": "1m",
+    "time": {
+      "from": "now-24h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Active Alerts",
+        "type": "table",
+        "targets": [
+          {
+            "expr": "ALERTS{alertname=~\".*orthanc.*\", alertstate=\"firing\"}",
+            "legendFormat": "",
+            "refId": "A",
+            "format": "table"
+          }
+        ],
+        "transformations": [
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {
+                "__name__": true,
+                "job": true
+              },
+              "indexByName": {},
+              "renameByName": {
+                "alertname": "Alert",
+                "alertstate": "State",
+                "severity": "Severity",
+                "instance": "Instance"
+              }
+            }
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 24,
+          "x": 0,
+          "y": 0
+        }
+      },
+      {
+        "id": 2,
+        "title": "Alert Frequency (24h)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "increase(prometheus_notifications_total{alertname=~\".*orthanc.*\"}[1h])",
+            "legendFormat": "{{alertname}}",
+            "refId": "A"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Alerts",
+            "min": 0
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 8
+        }
+      },
+      {
+        "id": 3,
+        "title": "Alert Duration",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "(time() - ALERTS_FOR_STATE{alertname=~\".*orthanc.*\", alertstate=\"firing\"}) / 60",
+            "legendFormat": "{{alertname}} Duration (min)",
+            "refId": "A"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Minutes",
+            "min": 0
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 8
+        }
+      },
+      {
+        "id": 4,
+        "title": "System Health Score",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "(orthanc_bridge_orthanc_connectivity + orthanc_bridge_database_connectivity + (orthanc_bridge_queue_depth < 100) + (rate(orthanc_bridge_job_failures_total[5m]) < 0.1)) / 4 * 100",
+            "legendFormat": "Health Score %",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {
+                  "color": "red",
+                  "value": 0
+                },
+                {
+                  "color": "yellow",
+                  "value": 50
+                },
+                {
+                  "color": "green",
+                  "value": 80
+                }
+              ]
+            },
+            "unit": "percent",
+            "min": 0,
+            "max": 100
+          }
+        },
+        "gridPos": {
+          "h": 4,
+          "w": 6,
+          "x": 0,
+          "y": 16
+        }
+      },
+      {
+        "id": 5,
+        "title": "Mean Time to Recovery (MTTR)",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "avg(increase(prometheus_notifications_total{alertname=~\".*orthanc.*\", alertstate=\"resolved\"}[24h]) / increase(prometheus_notifications_total{alertname=~\".*orthanc.*\", alertstate=\"firing\"}[24h])) * 60",
+            "legendFormat": "MTTR (min)",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {
+                  "color": "green",
+                  "value": 0
+                },
+                {
+                  "color": "yellow",
+                  "value": 30
+                },
+                {
+                  "color": "red",
+                  "value": 60
+                }
+              ]
+            },
+            "unit": "m"
+          }
+        },
+        "gridPos": {
+          "h": 4,
+          "w": 6,
+          "x": 6,
+          "y": 16
+        }
+      },
+      {
+        "id": 6,
+        "title": "Alert Severity Distribution",
+        "type": "piechart",
+        "targets": [
+          {
+            "expr": "count by (severity) (ALERTS{alertname=~\".*orthanc.*\", alertstate=\"firing\"})",
+            "legendFormat": "{{severity}}",
+            "refId": "A"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 16
+        }
+      },
+      {
+        "id": 7,
+        "title": "Recent Alert History",
+        "type": "logs",
+        "targets": [
+          {
+            "expr": "{job=\"alertmanager\"} |= \"orthanc\"",
+            "refId": "A"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 24,
+          "x": 0,
+          "y": 24
+        }
+      },
+      {
+        "id": 8,
+        "title": "SLA Metrics",
+        "type": "table",
+        "targets": [
+          {
+            "expr": "100 - (increase(prometheus_notifications_total{alertname=\"OrthancDown\"}[30d]) / (30 * 24 * 60) * 100)",
+            "legendFormat": "Orthanc Uptime %",
+            "refId": "A",
+            "format": "table"
+          },
+          {
+            "expr": "100 - (increase(prometheus_notifications_total{alertname=\"DatabaseDown\"}[30d]) / (30 * 24 * 60) * 100)",
+            "legendFormat": "Database Uptime %",
+            "refId": "B",
+            "format": "table"
+          },
+          {
+            "expr": "100 - (increase(prometheus_notifications_total{alertname=\"HighJobFailureRate\"}[30d]) / (30 * 24 * 60) * 100)",
+            "legendFormat": "Processing Success %",
+            "refId": "C",
+            "format": "table"
+          }
+        ],
+        "transformations": [
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {
+                "Time": true
+              },
+              "indexByName": {},
+              "renameByName": {
+                "Value": "SLA %"
+              }
+            }
+          }
+        ],
+        "gridPos": {
+          "h": 6,
+          "w": 12,
+          "x": 0,
+          "y": 32
+        }
+      },
+      {
+        "id": 9,
+        "title": "Notification Channels Status",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "up{job=\"alertmanager\"}",
+            "legendFormat": "AlertManager",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {
+                  "color": "red",
+                  "value": 0
+                },
+                {
+                  "color": "green",
+                  "value": 1
+                }
+              ]
+            },
+            "mappings": [
+              {
+                "options": {
+                  "0": {
+                    "text": "DOWN"
+                  },
+                  "1": {
+                    "text": "UP"
+                  }
+                },
+                "type": "value"
+              }
+            ]
+          }
+        },
+        "gridPos": {
+          "h": 6,
+          "w": 12,
+          "x": 12,
+          "y": 32
+        }
+      }
+    ],
+    "templating": {
+      "list": [
+        {
+          "allValue": null,
+          "current": {
+            "selected": false,
+            "text": "All",
+            "value": "$__all"
+          },
+          "datasource": "Prometheus",
+          "definition": "label_values(ALERTS, severity)",
+          "hide": 0,
+          "includeAll": true,
+          "label": "Severity",
+          "multi": true,
+          "name": "severity",
+          "options": [],
+          "query": "label_values(ALERTS, severity)",
+          "refresh": 1,
+          "regex": "",
+          "skipUrlSync": false,
+          "sort": 0,
+          "type": "query"
+        }
+      ]
+    },
+    "annotations": {
+      "list": [
+        {
+          "builtIn": 1,
+          "datasource": "-- Grafana --",
+          "enable": true,
+          "hide": true,
+          "iconColor": "rgba(0, 211, 255, 1)",
+          "name": "Annotations & Alerts",
+          "type": "dashboard"
+        }
+      ]
+    },
+    "schemaVersion": 27,
+    "version": 1,
+    "links": [
+      {
+        "asDropdown": false,
+        "icon": "external link",
+        "includeVars": false,
+        "keepTime": false,
+        "tags": [],
+        "targetBlank": true,
+        "title": "Runbooks",
+        "tooltip": "Access incident runbooks",
+        "type": "link",
+        "url": "https://docs.orthanc-bridge.local/runbooks/"
+      }
+    ]
+  }
+}

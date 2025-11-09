@@ -1,0 +1,104 @@
+═══════════════════════════════════════════════════════════════
+  OHIF CORS FIX - 5 MINUTE SOLUTION
+═══════════════════════════════════════════════════════════════
+
+PROBLEM: OHIF shows "request failed" error
+CAUSE: Orthanc not allowing CORS requests
+SOLUTION: Add 5 lines to Orthanc config file
+
+═══════════════════════════════════════════════════════════════
+  STEP 1: Open Config File
+═══════════════════════════════════════════════════════════════
+
+1. Press Windows key + R
+2. Type: notepad
+3. Right-click Notepad → "Run as administrator"
+4. Click File → Open
+5. Navigate to: C:\Program Files\Orthanc Server\Configuration\
+6. Change filter to "All Files (*.*)"
+7. Open: orthanc.json
+
+═══════════════════════════════════════════════════════════════
+  STEP 2: Find the Right Spot
+═══════════════════════════════════════════════════════════════
+
+1. Press Ctrl+F
+2. Search for: HttpDescribeErrors
+3. You'll find: "HttpDescribeErrors" : true,
+
+═══════════════════════════════════════════════════════════════
+  STEP 3: Add These Lines
+═══════════════════════════════════════════════════════════════
+
+RIGHT AFTER the line "HttpDescribeErrors" : true,
+
+Add this (copy exactly):
+
+  "HttpHeaders": {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization, Accept, X-Requested-With"
+  },
+
+RESULT should look like:
+
+  "HttpThreadsCount" : 50,
+  "HttpDescribeErrors" : true,
+  "HttpHeaders": {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization, Accept, X-Requested-With"
+  },
+  "DicomTlsEnabled" : false,
+
+═══════════════════════════════════════════════════════════════
+  STEP 4: Save
+═══════════════════════════════════════════════════════════════
+
+1. Press Ctrl+S
+2. Close Notepad
+
+═══════════════════════════════════════════════════════════════
+  STEP 5: Restart Orthanc
+═══════════════════════════════════════════════════════════════
+
+METHOD 1 (Easiest):
+1. Press Windows key + R
+2. Type: services.msc
+3. Find "Orthanc"
+4. Right-click → Restart
+
+METHOD 2 (Command):
+1. Open Command Prompt as Administrator
+2. Run: net stop Orthanc
+3. Run: net start Orthanc
+
+═══════════════════════════════════════════════════════════════
+  STEP 6: Test
+═══════════════════════════════════════════════════════════════
+
+1. Open browser
+2. Go to: http://localhost:3001
+3. Press Ctrl+F5 (hard refresh)
+4. ✓ Studies should now appear!
+
+═══════════════════════════════════════════════════════════════
+  TROUBLESHOOTING
+═══════════════════════════════════════════════════════════════
+
+If Orthanc won't start:
+→ You have a JSON syntax error
+→ Check all commas are in place
+→ Restore backup from: C:\Program Files\Orthanc Server\Configuration\
+
+If OHIF still shows error:
+→ Clear browser cache (Ctrl+Shift+Delete)
+→ Hard refresh again (Ctrl+F5)
+→ Check Orthanc is running: http://localhost:8042
+
+═══════════════════════════════════════════════════════════════
+  THAT'S IT!
+═══════════════════════════════════════════════════════════════
+
+After this, OHIF will be fully functional and integrated with
+your radiology viewer!

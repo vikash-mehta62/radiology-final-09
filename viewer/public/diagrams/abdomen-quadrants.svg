@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <rect x="50" y="40" width="100" height="100" rx="10" fill="none" stroke="#4A5568" stroke-width="2"/>
+  <line x1="100" y1="40" x2="100" y2="140" stroke="#4A5568" stroke-width="1.5"/>
+  <line x1="50" y1="90" x2="150" y2="90" stroke="#4A5568" stroke-width="1.5"/>
+  <text x="75" y="65" text-anchor="middle" font-size="10" fill="#718096">RUQ</text>
+  <text x="125" y="65" text-anchor="middle" font-size="10" fill="#718096">LUQ</text>
+  <text x="75" y="115" text-anchor="middle" font-size="10" fill="#718096">RLQ</text>
+  <text x="125" y="115" text-anchor="middle" font-size="10" fill="#718096">LLQ</text>
+  <text x="100" y="190" text-anchor="middle" font-size="12" fill="#718096">Abdominal Quadrants</text>
+</svg>

@@ -1,0 +1,325 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Orthanc Bridge - System Overview",
+    "tags": ["orthanc", "bridge", "medical-imaging"],
+    "style": "dark",
+    "timezone": "browser",
+    "refresh": "30s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "System Status",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "orthanc_bridge_orthanc_connectivity",
+            "legendFormat": "Orthanc",
+            "refId": "A"
+          },
+          {
+            "expr": "orthanc_bridge_database_connectivity",
+            "legendFormat": "Database",
+            "refId": "B"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {
+                  "color": "red",
+                  "value": 0
+                },
+                {
+                  "color": "green",
+                  "value": 1
+                }
+              ]
+            },
+            "mappings": [
+              {
+                "options": {
+                  "0": {
+                    "text": "DOWN"
+                  },
+                  "1": {
+                    "text": "UP"
+                  }
+                },
+                "type": "value"
+              }
+            ]
+          }
+        },
+        "gridPos": {
+          "h": 4,
+          "w": 12,
+          "x": 0,
+          "y": 0
+        }
+      },
+      {
+        "id": 2,
+        "title": "Queue Depth",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "orthanc_bridge_queue_depth",
+            "legendFormat": "Queue Depth",
+            "refId": "A"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Items",
+            "min": 0
+          }
+        ],
+        "alert": {
+          "conditions": [
+            {
+              "evaluator": {
+                "params": [100],
+                "type": "gt"
+              },
+              "operator": {
+                "type": "and"
+              },
+              "query": {
+                "params": ["A", "5m", "now"]
+              },
+              "reducer": {
+                "params": [],
+                "type": "avg"
+              },
+              "type": "query"
+            }
+          ],
+          "executionErrorState": "alerting",
+          "for": "5m",
+          "frequency": "10s",
+          "handler": 1,
+          "name": "High Queue Depth",
+          "noDataState": "no_data",
+          "notifications": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 0
+        }
+      },
+      {
+        "id": 3,
+        "title": "Processing Throughput",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "orthanc_bridge_throughput_instances_per_minute{time_window=\"1m\"}",
+            "legendFormat": "1 minute",
+            "refId": "A"
+          },
+          {
+            "expr": "orthanc_bridge_throughput_instances_per_minute{time_window=\"5m\"}",
+            "legendFormat": "5 minutes",
+            "refId": "B"
+          },
+          {
+            "expr": "orthanc_bridge_throughput_instances_per_minute{time_window=\"1h\"}",
+            "legendFormat": "1 hour",
+            "refId": "C"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Instances/min",
+            "min": 0
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 4
+        }
+      },
+      {
+        "id": 4,
+        "title": "Processing Time Distribution",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.50, rate(orthanc_bridge_processing_time_seconds_bucket[5m]))",
+            "legendFormat": "50th percentile",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(orthanc_bridge_processing_time_seconds_bucket[5m]))",
+            "legendFormat": "95th percentile",
+            "refId": "B"
+          },
+          {
+            "expr": "histogram_quantile(0.99, rate(orthanc_bridge_processing_time_seconds_bucket[5m]))",
+            "legendFormat": "99th percentile",
+            "refId": "C"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Seconds",
+            "min": 0
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 8
+        }
+      },
+      {
+        "id": 5,
+        "title": "Job Failures",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(orthanc_bridge_job_failures_total[5m])",
+            "legendFormat": "Failure Rate",
+            "refId": "A"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Failures/sec",
+            "min": 0
+          }
+        ],
+        "alert": {
+          "conditions": [
+            {
+              "evaluator": {
+                "params": [0.1],
+                "type": "gt"
+              },
+              "operator": {
+                "type": "and"
+              },
+              "query": {
+                "params": ["A", "5m", "now"]
+              },
+              "reducer": {
+                "params": [],
+                "type": "avg"
+              },
+              "type": "query"
+            }
+          ],
+          "executionErrorState": "alerting",
+          "for": "3m",
+          "frequency": "10s",
+          "handler": 1,
+          "name": "High Failure Rate",
+          "noDataState": "no_data",
+          "notifications": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 12
+        }
+      },
+      {
+        "id": 6,
+        "title": "System Resources",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "orthanc_bridge_process_resident_memory_bytes / 1024 / 1024",
+            "legendFormat": "Memory (MB)",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(orthanc_bridge_process_cpu_seconds_total[5m]) * 100",
+            "legendFormat": "CPU %",
+            "refId": "B"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Usage",
+            "min": 0
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 12
+        }
+      },
+      {
+        "id": 7,
+        "title": "Webhook Activity",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(orthanc_bridge_webhooks_received_total{status=\"success\"}[5m])",
+            "legendFormat": "Successful",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(orthanc_bridge_webhooks_received_total{status=\"failed\"}[5m])",
+            "legendFormat": "Failed",
+            "refId": "B"
+          },
+          {
+            "expr": "rate(orthanc_bridge_webhooks_received_total{status=\"security_violation\"}[5m])",
+            "legendFormat": "Security Violations",
+            "refId": "C"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Webhooks/sec",
+            "min": 0
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 24,
+          "x": 0,
+          "y": 20
+        }
+      }
+    ],
+    "templating": {
+      "list": []
+    },
+    "annotations": {
+      "list": [
+        {
+          "builtIn": 1,
+          "datasource": "-- Grafana --",
+          "enable": true,
+          "hide": true,
+          "iconColor": "rgba(0, 211, 255, 1)",
+          "name": "Annotations & Alerts",
+          "type": "dashboard"
+        }
+      ]
+    },
+    "schemaVersion": 27,
+    "version": 1,
+    "links": []
+  }
+}

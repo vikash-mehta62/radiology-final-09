@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <path d="M 50 100 Q 80 40 120 50 Q 150 60 150 100 Q 150 140 120 150 Q 80 160 50 100 Z" 
+        fill="none" stroke="#4A5568" stroke-width="2"/>
+  <path d="M 70 80 Q 90 70 110 75 Q 120 80 120 100" fill="none" stroke="#4A5568" stroke-width="1"/>
+  <circle cx="85" cy="100" r="15" fill="none" stroke="#4A5568" stroke-width="1"/>
+  <text x="100" y="190" text-anchor="middle" font-size="12" fill="#718096">Brain - Sagittal View</text>
+</svg>

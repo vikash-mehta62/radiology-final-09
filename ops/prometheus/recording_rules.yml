@@ -1,0 +1,154 @@
+# Prometheus Recording Rules for Unified Reporting System
+# These pre-compute expensive queries for faster dashboard loading
+
+groups:
+  - name: reporting_autosave
+    interval: 30s
+    rules:
+      # Autosave success rate (5-minute window)
+      - record: autosave_success_rate:5m
+        expr: |
+          sum(rate(autosave_success_total{service="viewer"}[5m])) by (env, service)
+          /
+          sum(rate(autosave_attempt_total{service="viewer"}[5m])) by (env, service)
+
+      # Autosave failure rate
+      - record: autosave_failure_rate:5m
+        expr: |
+          sum(rate(autosave_failure_total{service="viewer"}[5m])) by (env, service)
+          /
+          sum(rate(autosave_attempt_total{service="viewer"}[5m])) by (env, service)
+
+      # Autosave latency percentiles
+      - record: autosave_latency:p50
+        expr: |
+          histogram_quantile(0.50,
+            sum(rate(autosave_latency_bucket{service="viewer"}[5m])) by (le, env, service)
+          )
+
+      - record: autosave_latency:p95
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(autosave_latency_bucket{service="viewer"}[5m])) by (le, env, service)
+          )
+
+      - record: autosave_latency:p99
+        expr: |
+          histogram_quantile(0.99,
+            sum(rate(autosave_latency_bucket{service="viewer"}[5m])) by (le, env, service)
+          )
+
+  - name: reporting_api
+    interval: 30s
+    rules:
+      # API latency percentiles by endpoint
+      - record: api_latency:p50
+        expr: |
+          histogram_quantile(0.50,
+            sum(rate(api_latency_bucket{service="viewer",endpoint=~"/api/reports.*"}[5m])) by (le, env, service, endpoint)
+          )
+
+      - record: api_latency:p95
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(api_latency_bucket{service="viewer",endpoint=~"/api/reports.*"}[5m])) by (le, env, service, endpoint)
+          )
+
+      - record: api_latency:p99
+        expr: |
+          histogram_quantile(0.99,
+            sum(rate(api_latency_bucket{service="viewer",endpoint=~"/api/reports.*"}[5m])) by (le, env, service, endpoint)
+          )
+
+      # API error rate by endpoint
+      - record: api_error_rate:5m
+        expr: |
+          sum(rate(api_error_total{service="viewer",endpoint=~"/api/reports.*"}[5m])) by (env, service, endpoint)
+          /
+          sum(rate(api_request_total{service="viewer",endpoint=~"/api/reports.*"}[5m])) by (env, service, endpoint)
+
+      # API success rate
+      - record: api_success_rate:5m
+        expr: |
+          sum(rate(api_success_total{service="viewer",endpoint=~"/api/reports.*"}[5m])) by (env, service, endpoint)
+          /
+          sum(rate(api_request_total{service="viewer",endpoint=~"/api/reports.*"}[5m])) by (env, service, endpoint)
+
+  - name: reporting_operations
+    interval: 30s
+    rules:
+      # Version conflict rate
+      - record: version_conflict_rate:5m
+        expr: |
+          sum(rate(version_conflict_total{service="viewer"}[5m])) by (env, service)
+
+      # Export error rate
+      - record: export_error_rate:5m
+        expr: |
+          sum(rate(report_export_failure_total{service="viewer"}[5m])) by (env, service, format)
+          /
+          sum(rate(report_export_attempt_total{service="viewer"}[5m])) by (env, service, format)
+
+      # Finalize throughput
+      - record: report_finalize_rate:5m
+        expr: |
+          sum(rate(report_finalize_total{service="viewer"}[5m])) by (env, service)
+
+      # Sign throughput
+      - record: report_sign_rate:5m
+        expr: |
+          sum(rate(report_sign_total{service="viewer"}[5m])) by (env, service)
+
+      # Finalize success rate
+      - record: report_finalize_success_rate:5m
+        expr: |
+          sum(rate(report_finalize_success_total{service="viewer"}[5m])) by (env, service)
+          /
+          sum(rate(report_finalize_attempt_total{service="viewer"}[5m])) by (env, service)
+
+      # Sign success rate
+      - record: report_sign_success_rate:5m
+        expr: |
+          sum(rate(report_sign_success_total{service="viewer"}[5m])) by (env, service)
+          /
+          sum(rate(report_sign_attempt_total{service="viewer"}[5m])) by (env, service)
+
+  - name: reporting_slo
+    interval: 30s
+    rules:
+      # Error budget burn rate (autosave SLO: 99.5%)
+      - record: autosave_error_budget_burn:5m
+        expr: |
+          (1 - autosave_success_rate:5m) / 0.005
+
+      # Error budget remaining (0-1 scale)
+      - record: autosave_error_budget_remaining:5m
+        expr: |
+          1 - (autosave_error_budget_burn:5m)
+
+      # Fast burn alert (10x normal rate)
+      - record: autosave_fast_burn:5m
+        expr: |
+          autosave_error_budget_burn:5m > 10
+
+      # Moderate burn alert (3x normal rate)
+      - record: autosave_moderate_burn:5m
+        expr: |
+          autosave_error_budget_burn:5m > 3
+
+  - name: reporting_network
+    interval: 30s
+    rules:
+      # Offline session rate
+      - record: network_offline_rate:5m
+        expr: |
+          sum(rate(network_offline_total{service="viewer"}[5m])) by (env, service)
+          /
+          sum(rate(network_event_total{service="viewer"}[5m])) by (env, service)
+
+      # Online session rate
+      - record: network_online_rate:5m
+        expr: |
+          sum(rate(network_online_total{service="viewer"}[5m])) by (env, service)
+          /
+          sum(rate(network_event_total{service="viewer"}[5m])) by (env, service)

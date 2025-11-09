@@ -1,0 +1,160 @@
+{
+  "permissions": [
+    {
+      "name": "system:read",
+      "description": "View system information"
+    },
+    {
+      "name": "system:write",
+      "description": "Modify system configuration"
+    },
+    {
+      "name": "system:admin",
+      "description": "Full system administration"
+    },
+    {
+      "name": "users:read",
+      "description": "View user information"
+    },
+    {
+      "name": "users:write",
+      "description": "Create and modify users"
+    },
+    {
+      "name": "users:delete",
+      "description": "Delete users"
+    },
+    {
+      "name": "dicom:read",
+      "description": "View DICOM studies and images"
+    },
+    {
+      "name": "dicom:write",
+      "description": "Upload and modify DICOM data"
+    },
+    {
+      "name": "dicom:delete",
+      "description": "Delete DICOM studies"
+    },
+    {
+      "name": "dicom:anonymize",
+      "description": "Anonymize DICOM data"
+    },
+    {
+      "name": "audit:read",
+      "description": "View audit logs"
+    },
+    {
+      "name": "audit:export",
+      "description": "Export audit logs"
+    },
+    {
+      "name": "monitoring:read",
+      "description": "View monitoring data and metrics"
+    },
+    {
+      "name": "monitoring:write",
+      "description": "Configure monitoring and alerts"
+    },
+    {
+      "name": "secrets:read",
+      "description": "View secret configurations"
+    },
+    {
+      "name": "secrets:write",
+      "description": "Modify secrets"
+    },
+    {
+      "name": "backup:read",
+      "description": "View backup status"
+    },
+    {
+      "name": "backup:write",
+      "description": "Create and manage backups"
+    },
+    {
+      "name": "backup:restore",
+      "description": "Restore from backups"
+    }
+  ],
+  "roles": [
+    {
+      "id": "admin",
+      "name": "Administrator",
+      "description": "Full system access with all permissions",
+      "permissions": [
+        "system:read",
+        "system:write",
+        "system:admin",
+        "users:read",
+        "users:write",
+        "users:delete",
+        "dicom:read",
+        "dicom:write",
+        "dicom:delete",
+        "dicom:anonymize",
+        "audit:read",
+        "audit:export",
+        "monitoring:read",
+        "monitoring:write",
+        "secrets:read",
+        "secrets:write",
+        "backup:read",
+        "backup:write",
+        "backup:restore"
+      ],
+      "inherits": []
+    },
+    {
+      "id": "operator",
+      "name": "Operator",
+      "description": "Operational access for day-to-day management",
+      "permissions": [
+        "system:read",
+        "dicom:read",
+        "dicom:write",
+        "dicom:anonymize",
+        "monitoring:read",
+        "backup:read",
+        "audit:read"
+      ],
+      "inherits": []
+    },
+    {
+      "id": "radiologist",
+      "name": "Radiologist",
+      "description": "Clinical access for viewing and working with DICOM data",
+      "permissions": [
+        "dicom:read",
+        "dicom:write",
+        "monitoring:read"
+      ],
+      "inherits": []
+    },
+    {
+      "id": "readonly",
+      "name": "Read Only",
+      "description": "Read-only access to system and DICOM data",
+      "permissions": [
+        "system:read",
+        "dicom:read",
+        "monitoring:read",
+        "audit:read"
+      ],
+      "inherits": []
+    },
+    {
+      "id": "auditor",
+      "name": "Auditor",
+      "description": "Access to audit logs and compliance data",
+      "permissions": [
+        "audit:read",
+        "audit:export",
+        "monitoring:read",
+        "system:read"
+      ],
+      "inherits": []
+    }
+  ],
+  "lastUpdated": "2024-01-01T00:00:00.000Z"
+}

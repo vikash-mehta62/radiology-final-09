@@ -1,0 +1,89 @@
+{
+  "Name": "ORTHANC_DEV_AE",
+  "DicomAet": "ORTHANC_DEV_AE", 
+  "DicomPort": 4242,
+  "HttpPort": 8042,
+  
+  "RemoteAccessAllowed": true,
+  "AuthenticationEnabled": true,
+  "RegisteredUsers": {
+    "orthanc": "orthanc_secure_2024"
+  },
+  
+  "DicomModalities": {},
+  "OrthancPeers": {},
+  
+  "HttpVerbose": false,
+  "DicomVerbose": false,
+  
+  "StorageDirectory": "/var/lib/orthanc/storage",
+  "IndexDirectory": "/var/lib/orthanc/db",
+  
+  "StorageCompression": false,
+  "MaximumStorageSize": 0,
+  "MaximumPatientCount": 0,
+  
+  "DicomAssociationCloseDelay": 5,
+  "DicomScuTimeout": 10,
+  "DicomScpTimeout": 30,
+  
+  "HttpTimeout": 60,
+  "HttpRequestTimeout": 30,
+  
+  "UnknownSopClassAccepted": false,
+  "DicomCheckModalityHost": false,
+  
+  "DicomAlwaysAllowEcho": true,
+  "DicomAlwaysAllowFind": false,
+  "DicomAlwaysAllowMove": false,
+  "DicomAlwaysAllowGet": false,
+  "DicomAlwaysAllowStore": true,
+  
+  "DicomCheckCalledAet": false,
+  "DicomCheckCallingAet": false,
+  
+  "ExecuteLuaEnabled": false,
+  "HttpsVerifyPeers": true,
+  "HttpsCACertificates": "",
+  
+  "UserMetadata": {},
+  "DefaultEncoding": "Latin1",
+  "DeidentifyLogs": true,
+  "DeidentifyLogsDicomVersion": "2023b",
+  
+  "LoadPrivateDictionary": true,
+  "Dictionary": {},
+  
+  "SynchronousCMove": true,
+  "JobsHistorySize": 10,
+  "SaveJobs": true,
+  
+  "OverwriteInstances": false,
+  "MediaArchiveSize": 1,
+  
+  "StoreMD5ForAttachments": true,
+  
+  "LimitFindResults": 0,
+  "LimitFindInstances": 0,
+  
+  "LogExportedResources": false,
+  "KeepAlive": true,
+  "TcpNoDelay": true,
+  
+  "HttpThreadsCount": 50,
+  "HttpDescribeErrors": true,
+  
+  "DicomTlsEnabled": false,
+  
+  "Plugins": [],
+  
+  "OnStoredInstance": [],
+  "OnChange": [],
+  "OnDeletedPatient": [],
+  "OnDeletedStudy": [],
+  "OnDeletedSeries": [],
+  "OnDeletedInstance": [],
+  "OnStablePatient": [],
+  "OnStableStudy": [],
+  "OnStableSeries": []
+}

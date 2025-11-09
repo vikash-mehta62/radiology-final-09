@@ -1,0 +1,210 @@
+{
+  "dashboard": {
+    "title": "PACS System Dashboard",
+    "tags": ["pacs", "production"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "System Overview",
+        "type": "stat",
+        "gridPos": { "x": 0, "y": 0, "w": 24, "h": 4 },
+        "targets": [
+          {
+            "expr": "up{job='backend'}",
+            "legendFormat": "Backend Status"
+          },
+          {
+            "expr": "up{job='mongodb'}",
+            "legendFormat": "MongoDB Status"
+          },
+          {
+            "expr": "up{job='redis'}",
+            "legendFormat": "Redis Status"
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "API Request Rate",
+        "type": "graph",
+        "gridPos": { "x": 0, "y": 4, "w": 12, "h": 8 },
+        "targets": [
+          {
+            "expr": "rate(http_requests_total[5m])",
+            "legendFormat": "{{method}} {{path}}"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "API Response Time (95th percentile)",
+        "type": "graph",
+        "gridPos": { "x": 12, "y": 4, "w": 12, "h": 8 },
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))",
+            "legendFormat": "{{path}}"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Error Rate",
+        "type": "graph",
+        "gridPos": { "x": 0, "y": 12, "w": 12, "h": 8 },
+        "targets": [
+          {
+            "expr": "rate(http_requests_total{status=~'5..'}[5m])",
+            "legendFormat": "5xx Errors"
+          },
+          {
+            "expr": "rate(http_requests_total{status=~'4..'}[5m])",
+            "legendFormat": "4xx Errors"
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Active Sessions",
+        "type": "graph",
+        "gridPos": { "x": 12, "y": 12, "w": 12, "h": 8 },
+        "targets": [
+          {
+            "expr": "active_sessions_total",
+            "legendFormat": "Active Sessions"
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Critical Notifications",
+        "type": "stat",
+        "gridPos": { "x": 0, "y": 20, "w": 6, "h": 4 },
+        "targets": [
+          {
+            "expr": "sum(notification_delivery_total{severity='critical'})",
+            "legendFormat": "Total Critical"
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "title": "Notification Delivery Rate",
+        "type": "graph",
+        "gridPos": { "x": 6, "y": 20, "w": 18, "h": 8 },
+        "targets": [
+          {
+            "expr": "rate(notification_delivery_total[5m])",
+            "legendFormat": "{{severity}} - {{channel}}"
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "title": "Signature Operations",
+        "type": "graph",
+        "gridPos": { "x": 0, "y": 28, "w": 12, "h": 8 },
+        "targets": [
+          {
+            "expr": "rate(signature_operations_total[5m])",
+            "legendFormat": "{{operation}}"
+          }
+        ]
+      },
+      {
+        "id": 9,
+        "title": "Export Queue Length",
+        "type": "graph",
+        "gridPos": { "x": 12, "y": 28, "w": 12, "h": 8 },
+        "targets": [
+          {
+            "expr": "export_queue_length",
+            "legendFormat": "{{format}}"
+          }
+        ]
+      },
+      {
+        "id": 10,
+        "title": "Database Connections",
+        "type": "graph",
+        "gridPos": { "x": 0, "y": 36, "w": 12, "h": 8 },
+        "targets": [
+          {
+            "expr": "mongodb_connections{state='current'}",
+            "legendFormat": "Current Connections"
+          }
+        ]
+      },
+      {
+        "id": 11,
+        "title": "Redis Memory Usage",
+        "type": "graph",
+        "gridPos": { "x": 12, "y": 36, "w": 12, "h": 8 },
+        "targets": [
+          {
+            "expr": "redis_memory_used_bytes / redis_memory_max_bytes * 100",
+            "legendFormat": "Memory Usage %"
+          }
+        ]
+      },
+      {
+        "id": 12,
+        "title": "CPU Usage",
+        "type": "graph",
+        "gridPos": { "x": 0, "y": 44, "w": 12, "h": 8 },
+        "targets": [
+          {
+            "expr": "100 - (avg by(instance) (rate(node_cpu_seconds_total{mode='idle'}[5m])) * 100)",
+            "legendFormat": "{{instance}}"
+          }
+        ]
+      },
+      {
+        "id": 13,
+        "title": "Memory Usage",
+        "type": "graph",
+        "gridPos": { "x": 12, "y": 44, "w": 12, "h": 8 },
+        "targets": [
+          {
+            "expr": "(node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100",
+            "legendFormat": "{{instance}}"
+          }
+        ]
+      },
+      {
+        "id": 14,
+        "title": "Disk Usage",
+        "type": "graph",
+        "gridPos": { "x": 0, "y": 52, "w": 12, "h": 8 },
+        "targets": [
+          {
+            "expr": "(node_filesystem_size_bytes - node_filesystem_avail_bytes) / node_filesystem_size_bytes * 100",
+            "legendFormat": "{{mountpoint}}"
+          }
+        ]
+      },
+      {
+        "id": 15,
+        "title": "Network Traffic",
+        "type": "graph",
+        "gridPos": { "x": 12, "y": 52, "w": 12, "h": 8 },
+        "targets": [
+          {
+            "expr": "rate(node_network_receive_bytes_total[5m])",
+            "legendFormat": "Receive {{device}}"
+          },
+          {
+            "expr": "rate(node_network_transmit_bytes_total[5m])",
+            "legendFormat": "Transmit {{device}}"
+          }
+        ]
+      }
+    ],
+    "refresh": "30s",
+    "time": {
+      "from": "now-6h",
+      "to": "now"
+    }
+  }
+}

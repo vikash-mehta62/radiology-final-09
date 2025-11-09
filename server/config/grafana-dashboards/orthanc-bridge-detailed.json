@@ -1,0 +1,292 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Orthanc Bridge - Detailed Metrics",
+    "tags": ["orthanc", "bridge", "detailed"],
+    "style": "dark",
+    "timezone": "browser",
+    "refresh": "15s",
+    "time": {
+      "from": "now-30m",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Instance Processing by Status",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(orthanc_bridge_instances_processed_total{status=\"success\"}[5m])",
+            "legendFormat": "Success",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(orthanc_bridge_instances_processed_total{status=\"failed\"}[5m])",
+            "legendFormat": "Failed",
+            "refId": "B"
+          },
+          {
+            "expr": "rate(orthanc_bridge_instances_processed_total{status=\"skipped\"}[5m])",
+            "legendFormat": "Skipped",
+            "refId": "C"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Instances/sec",
+            "min": 0
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 0
+        }
+      },
+      {
+        "id": 2,
+        "title": "Processing Time by Operation",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(orthanc_bridge_processing_time_seconds_bucket{operation_type=\"dicom_parse\"}[5m]))",
+            "legendFormat": "DICOM Parse (95th)",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(orthanc_bridge_processing_time_seconds_bucket{operation_type=\"image_convert\"}[5m]))",
+            "legendFormat": "Image Convert (95th)",
+            "refId": "B"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(orthanc_bridge_processing_time_seconds_bucket{operation_type=\"upload\"}[5m]))",
+            "legendFormat": "Upload (95th)",
+            "refId": "C"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Seconds",
+            "min": 0
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 0
+        }
+      },
+      {
+        "id": 3,
+        "title": "Job Failures by Type",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(orthanc_bridge_job_failures_total{job_type=\"dicom_processing\"}[5m])",
+            "legendFormat": "DICOM Processing",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(orthanc_bridge_job_failures_total{job_type=\"image_conversion\"}[5m])",
+            "legendFormat": "Image Conversion",
+            "refId": "B"
+          },
+          {
+            "expr": "rate(orthanc_bridge_job_failures_total{job_type=\"upload\"}[5m])",
+            "legendFormat": "Upload",
+            "refId": "C"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Failures/sec",
+            "min": 0
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 8
+        }
+      },
+      {
+        "id": 4,
+        "title": "Queue Depth by Type",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "orthanc_bridge_queue_depth{queue_type=\"processing\"}",
+            "legendFormat": "Processing Queue",
+            "refId": "A"
+          },
+          {
+            "expr": "orthanc_bridge_queue_depth{queue_type=\"upload\"}",
+            "legendFormat": "Upload Queue",
+            "refId": "B"
+          },
+          {
+            "expr": "orthanc_bridge_queue_depth{queue_type=\"retry\"}",
+            "legendFormat": "Retry Queue",
+            "refId": "C"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Items",
+            "min": 0
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 8
+        }
+      },
+      {
+        "id": 5,
+        "title": "Health Check Response Times",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(orthanc_bridge_processing_time_seconds_bucket{operation_type=\"health_check_orthanc\"}[5m]))",
+            "legendFormat": "Orthanc Check",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(orthanc_bridge_processing_time_seconds_bucket{operation_type=\"health_check_database\"}[5m]))",
+            "legendFormat": "Database Check",
+            "refId": "B"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(orthanc_bridge_processing_time_seconds_bucket{operation_type=\"health_check_webhook\"}[5m]))",
+            "legendFormat": "Webhook Check",
+            "refId": "C"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Seconds",
+            "min": 0
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 16
+        }
+      },
+      {
+        "id": 6,
+        "title": "Memory Usage Details",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "orthanc_bridge_process_resident_memory_bytes / 1024 / 1024",
+            "legendFormat": "RSS (MB)",
+            "refId": "A"
+          },
+          {
+            "expr": "orthanc_bridge_process_virtual_memory_bytes / 1024 / 1024",
+            "legendFormat": "Virtual (MB)",
+            "refId": "B"
+          },
+          {
+            "expr": "orthanc_bridge_nodejs_heap_size_used_bytes / 1024 / 1024",
+            "legendFormat": "Heap Used (MB)",
+            "refId": "C"
+          },
+          {
+            "expr": "orthanc_bridge_nodejs_heap_size_total_bytes / 1024 / 1024",
+            "legendFormat": "Heap Total (MB)",
+            "refId": "D"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "MB",
+            "min": 0
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 16
+        }
+      },
+      {
+        "id": 7,
+        "title": "Webhook Security Events",
+        "type": "table",
+        "targets": [
+          {
+            "expr": "increase(orthanc_bridge_webhooks_received_total{status=\"security_violation\"}[1h])",
+            "legendFormat": "Security Violations (1h)",
+            "refId": "A",
+            "format": "table"
+          },
+          {
+            "expr": "increase(orthanc_bridge_webhooks_received_total{status=\"invalid_signature\"}[1h])",
+            "legendFormat": "Invalid Signatures (1h)",
+            "refId": "B",
+            "format": "table"
+          },
+          {
+            "expr": "increase(orthanc_bridge_webhooks_received_total{status=\"rate_limited\"}[1h])",
+            "legendFormat": "Rate Limited (1h)",
+            "refId": "C",
+            "format": "table"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 24,
+          "x": 0,
+          "y": 24
+        }
+      }
+    ],
+    "templating": {
+      "list": [
+        {
+          "allValue": null,
+          "current": {
+            "selected": false,
+            "text": "All",
+            "value": "$__all"
+          },
+          "datasource": "Prometheus",
+          "definition": "label_values(orthanc_bridge_instances_processed_total, study_type)",
+          "hide": 0,
+          "includeAll": true,
+          "label": "Study Type",
+          "multi": true,
+          "name": "study_type",
+          "options": [],
+          "query": "label_values(orthanc_bridge_instances_processed_total, study_type)",
+          "refresh": 1,
+          "regex": "",
+          "skipUrlSync": false,
+          "sort": 0,
+          "tagValuesQuery": "",
+          "tags": [],
+          "tagsQuery": "",
+          "type": "query",
+          "useTags": false
+        }
+      ]
+    },
+    "annotations": {
+      "list": []
+    },
+    "schemaVersion": 27,
+    "version": 1,
+    "links": []
+  }
+}

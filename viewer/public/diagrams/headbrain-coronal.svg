@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <ellipse cx="100" cy="90" rx="70" ry="60" fill="none" stroke="#4A5568" stroke-width="2"/>
+  <path d="M 50 90 Q 100 70 150 90" fill="none" stroke="#4A5568" stroke-width="1.5"/>
+  <path d="M 60 100 L 60 120 Q 100 140 140 120 L 140 100" fill="none" stroke="#4A5568" stroke-width="1.5"/>
+  <text x="100" y="190" text-anchor="middle" font-size="12" fill="#718096">Brain - Coronal View</text>
+</svg>

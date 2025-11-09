@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <rect x="70" y="100" width="60" height="40" rx="5" fill="none" stroke="#4A5568" stroke-width="2"/>
+  <rect x="85" y="60" width="8" height="45" rx="3" fill="none" stroke="#4A5568" stroke-width="1.5"/>
+  <rect x="95" y="50" width="8" height="55" rx="3" fill="none" stroke="#4A5568" stroke-width="1.5"/>
+  <rect x="105" y="55" width="8" height="50" rx="3" fill="none" stroke="#4A5568" stroke-width="1.5"/>
+  <rect x="115" y="65" width="8" height="40" rx="3" fill="none" stroke="#4A5568" stroke-width="1.5"/>
+  <text x="100" y="190" text-anchor="middle" font-size="12" fill="#718096">Hand Bones</text>
+</svg>

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <path d="M 100 30 Q 90 50 95 70 Q 105 90 95 110 Q 90 130 100 150" 
+        fill="none" stroke="#4A5568" stroke-width="3"/>
+  <circle cx="100" cy="40" r="5" fill="#4A5568"/>
+  <circle cx="93" cy="60" r="5" fill="#4A5568"/>
+  <circle cx="98" cy="80" r="5" fill="#4A5568"/>
+  <circle cx="93" cy="100" r="5" fill="#4A5568"/>
+  <circle cx="95" cy="120" r="5" fill="#4A5568"/>
+  <circle cx="100" cy="140" r="5" fill="#4A5568"/>
+  <text x="100" y="190" text-anchor="middle" font-size="12" fill="#718096">Spine - Lateral</text>
+</svg>

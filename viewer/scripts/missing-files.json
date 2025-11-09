@@ -1,0 +1,74 @@
+[
+  {
+    "bodyPart": "HeadBrain",
+    "view": "axial",
+    "fileName": "File:Brain_axial_section.svg",
+    "error": "No image info for File:Brain_axial_section.svg"
+  },
+  {
+    "bodyPart": "HeadBrain",
+    "view": "sagittal",
+    "fileName": "File:Brain_sagittal_section.svg",
+    "error": "No image info for File:Brain_sagittal_section.svg"
+  },
+  {
+    "bodyPart": "HeadBrain",
+    "view": "coronal",
+    "fileName": "File:Brain_coronal_section.svg",
+    "error": "No image info for File:Brain_coronal_section.svg"
+  },
+  {
+    "bodyPart": "Chest",
+    "view": "frontal",
+    "fileName": "File:Rib_cage_icon.svg",
+    "error": "No image info for File:Rib_cage_icon.svg"
+  },
+  {
+    "bodyPart": "Chest",
+    "view": "lateral",
+    "fileName": "File:Human_thorax_lateral_view_silhouette.svg",
+    "error": "No image info for File:Human_thorax_lateral_view_silhouette.svg"
+  },
+  {
+    "bodyPart": "Abdomen",
+    "view": "frontal",
+    "fileName": "File:Abdomen_silhouette.svg",
+    "error": "No image info for File:Abdomen_silhouette.svg"
+  },
+  {
+    "bodyPart": "Abdomen",
+    "view": "quadrants",
+    "fileName": "File:Abdominal_quadrants.svg",
+    "error": "No image info for File:Abdominal_quadrants.svg"
+  },
+  {
+    "bodyPart": "Spine",
+    "view": "lateral",
+    "fileName": "File:Spine_simple.svg",
+    "error": "No image info for File:Spine_simple.svg"
+  },
+  {
+    "bodyPart": "Spine",
+    "view": "frontal",
+    "fileName": "File:Human_spine_diagram.svg",
+    "error": "No image info for File:Human_spine_diagram.svg"
+  },
+  {
+    "bodyPart": "Pelvis",
+    "view": "frontal",
+    "fileName": "File:Pelvis_icon.svg",
+    "error": "No image info for File:Pelvis_icon.svg"
+  },
+  {
+    "bodyPart": "Extremities",
+    "view": "hand",
+    "fileName": "File:Hand_bones.svg",
+    "error": "No image info for File:Hand_bones.svg"
+  },
+  {
+    "bodyPart": "Extremities",
+    "view": "knee",
+    "fileName": "File:Knee_icon.svg",
+    "error": "No image info for File:Knee_icon.svg"
+  }
+]

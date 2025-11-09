@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generate Notification Sounds</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 10px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .warning {
+            background: #fff3e0;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Notification Sound Generator</h1>
+    
+    <div class="info">
+        <h3>Instructions:</h3>
+        <p>This tool generates simple beep sounds for notifications using the Web Audio API.</p>
+        <p>Click each button to generate and download the corresponding sound file.</p>
+    </div>
+
+    <div class="warning">
+        <h3>Note:</h3>
+        <p>These are basic placeholder sounds. For production use, consider using professional sound files from sound libraries.</p>
+    </div>
+
+    <h2>Generate Sounds:</h2>
+    <button onclick="generateSound('critical', 800, 0.5)">Generate Critical Sound (High Pitch)</button>
+    <button onclick="generateSound('high', 600, 0.4)">Generate High Priority Sound (Medium Pitch)</button>
+    <button onclick="generateSound('medium', 400, 0.3)">Generate Medium Priority Sound (Low Pitch)</button>
+    <button onclick="generateSound('default', 500, 0.3)">Generate Default Sound (Standard)</button>
+
+    <h2>Test Sounds:</h2>
+    <button onclick="testSound('critical', 800, 0.5)">Test Critical</button>
+    <button onclick="testSound('high', 600, 0.4)">Test High</button>
+    <button onclick="testSound('medium', 400, 0.3)">Test Medium</button>
+    <button onclick="testSound('default', 500, 0.3)">Test Default</button>
+
+    <script>
+        // Create audio context
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+        function generateBeep(frequency, duration, volume) {
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = frequency;
+            oscillator.type = 'sine';
+            
+            gainNode.gain.setValueAtTime(volume, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + duration);
+        }
+
+        function testSound(type, frequency, volume) {
+            console.log(`Testing ${type} sound...`);
+            generateBeep(frequency, 0.3, volume);
+        }
+
+        async function generateSound(type, frequency, volume) {
+            console.log(`Generating ${type} sound...`);
+            
+            // Create offline audio context for rendering
+            const offlineContext = new OfflineAudioContext(1, 44100 * 0.5, 44100);
+            
+            const oscillator = offlineContext.createOscillator();
+            const gainNode = offlineContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(offlineContext.destination);
+            
+            oscillator.frequency.value = frequency;
+            oscillator.type = 'sine';
+            
+            gainNode.gain.setValueAtTime(volume, 0);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, 0.3);
+            
+            oscillator.start(0);
+            oscillator.stop(0.3);
+            
+            // Render audio
+            const audioBuffer = await offlineContext.startRendering();
+            
+            // Convert to WAV (simplified)
+            const wav = audioBufferToWav(audioBuffer);
+            const blob = new Blob([wav], { type: 'audio/wav' });
+            
+            // Download
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `notification-${type}.wav`;
+            a.click();
+            
+            URL.revokeObjectURL(url);
+            
+            alert(`${type} sound generated! Note: File is in WAV format. Convert to MP3 for better compatibility.`);
+        }
+
+        function audioBufferToWav(buffer) {
+            const length = buffer.length * buffer.numberOfChannels * 2;
+            const arrayBuffer = new ArrayBuffer(44 + length);
+            const view = new DataView(arrayBuffer);
+            const channels = [];
+            let offset = 0;
+            let pos = 0;
+
+            // Write WAV header
+            setUint32(0x46464952); // "RIFF"
+            setUint32(36 + length); // file length - 8
+            setUint32(0x45564157); // "WAVE"
+            setUint32(0x20746d66); // "fmt " chunk
+            setUint32(16); // length = 16
+            setUint16(1); // PCM (uncompressed)
+            setUint16(buffer.numberOfChannels);
+            setUint32(buffer.sampleRate);
+            setUint32(buffer.sampleRate * 2 * buffer.numberOfChannels); // avg. bytes/sec
+            setUint16(buffer.numberOfChannels * 2); // block-align
+            setUint16(16); // 16-bit
+            setUint32(0x61746164); // "data" - chunk
+            setUint32(length); // chunk length
+
+            // Write audio data
+            for (let i = 0; i < buffer.numberOfChannels; i++) {
+                channels.push(buffer.getChannelData(i));
+            }
+
+            while (pos < buffer.length) {
+                for (let i = 0; i < buffer.numberOfChannels; i++) {
+                    let sample = Math.max(-1, Math.min(1, channels[i][pos]));
+                    sample = sample < 0 ? sample * 0x8000 : sample * 0x7FFF;
+                    view.setInt16(44 + offset, sample, true);
+                    offset += 2;
+                }
+                pos++;
+            }
+
+            return arrayBuffer;
+
+            function setUint16(data) {
+                view.setUint16(pos, data, true);
+                pos += 2;
+            }
+
+            function setUint32(data) {
+                view.setUint32(pos, data, true);
+                pos += 4;
+            }
+        }
+    </script>
+</body>
+</html>

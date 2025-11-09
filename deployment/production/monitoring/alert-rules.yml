@@ -1,0 +1,175 @@
+# Prometheus Alert Rules for PACS System
+
+groups:
+  - name: pacs_alerts
+    interval: 30s
+    rules:
+      # Service Availability Alerts
+      - alert: ServiceDown
+        expr: up == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Service {{ $labels.job }} is down"
+          description: "{{ $labels.job }} has been down for more than 2 minutes"
+
+      # Backend API Alerts
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High error rate on {{ $labels.job }}"
+          description: "Error rate is {{ $value }} errors/sec"
+
+      - alert: HighResponseTime
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High response time on {{ $labels.job }}"
+          description: "95th percentile response time is {{ $value }}s"
+
+      # Database Alerts
+      - alert: MongoDBDown
+        expr: mongodb_up == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "MongoDB is down"
+          description: "MongoDB has been down for more than 2 minutes"
+
+      - alert: MongoDBHighConnections
+        expr: mongodb_connections{state="current"} > 800
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "MongoDB has high number of connections"
+          description: "Current connections: {{ $value }}"
+
+      - alert: MongoDBReplicationLag
+        expr: mongodb_replset_member_replication_lag > 10
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "MongoDB replication lag is high"
+          description: "Replication lag is {{ $value }} seconds"
+
+      # Redis Alerts
+      - alert: RedisDown
+        expr: redis_up == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Redis is down"
+          description: "Redis has been down for more than 2 minutes"
+
+      - alert: RedisHighMemoryUsage
+        expr: redis_memory_used_bytes / redis_memory_max_bytes > 0.9
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Redis memory usage is high"
+          description: "Memory usage is {{ $value | humanizePercentage }}"
+
+      # System Resource Alerts
+      - alert: HighCPUUsage
+        expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage on {{ $labels.instance }}"
+          description: "CPU usage is {{ $value }}%"
+
+      - alert: HighMemoryUsage
+        expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes > 0.9
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage on {{ $labels.instance }}"
+          description: "Memory usage is {{ $value | humanizePercentage }}"
+
+      - alert: DiskSpaceLow
+        expr: (node_filesystem_avail_bytes / node_filesystem_size_bytes) < 0.1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Low disk space on {{ $labels.instance }}"
+          description: "Available disk space is {{ $value | humanizePercentage }}"
+
+      # Application-Specific Alerts
+      - alert: CriticalNotificationDeliveryFailed
+        expr: rate(notification_delivery_failures_total{severity="critical"}[5m]) > 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Critical notification delivery failures"
+          description: "{{ $value }} critical notifications failed to deliver"
+
+      - alert: SignatureVerificationFailed
+        expr: rate(signature_verification_failures_total[5m]) > 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Signature verification failures detected"
+          description: "{{ $value }} signature verifications failed"
+
+      - alert: ExportProcessingBacklog
+        expr: export_queue_length > 100
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Export processing backlog is high"
+          description: "{{ $value }} exports are queued"
+
+      - alert: SessionTimeoutRateHigh
+        expr: rate(session_timeouts_total[5m]) > 10
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High session timeout rate"
+          description: "{{ $value }} sessions timing out per second"
+
+      # Security Alerts
+      - alert: HighAuthenticationFailureRate
+        expr: rate(authentication_failures_total[5m]) > 5
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High authentication failure rate"
+          description: "{{ $value }} authentication failures per second"
+
+      - alert: SuspiciousIPActivity
+        expr: rate(suspicious_ip_blocks_total[5m]) > 0
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Suspicious IP activity detected"
+          description: "{{ $value }} IPs blocked for suspicious activity"
+
+      # Compliance Alerts
+      - alert: AuditLogWriteFailure
+        expr: rate(audit_log_write_failures_total[5m]) > 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Audit log write failures"
+          description: "{{ $value }} audit log writes failed - compliance risk!"

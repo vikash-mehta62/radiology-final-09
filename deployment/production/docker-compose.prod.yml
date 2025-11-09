@@ -1,0 +1,212 @@
+version: '3.8'
+
+services:
+  # Frontend - React Application
+  frontend:
+    image: ${DOCKER_REGISTRY}/pacs-frontend:${VERSION}
+    container_name: pacs-frontend-prod
+    restart: always
+    ports:
+      - "3000:80"
+    environment:
+      - NODE_ENV=production
+      - VITE_API_URL=${API_URL}
+      - VITE_WEBSOCKET_URL=${WEBSOCKET_URL}
+      - VITE_ORTHANC_URL=${ORTHANC_URL}
+    networks:
+      - pacs-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=Host(`${FRONTEND_DOMAIN}`)"
+      - "traefik.http.routers.frontend.entrypoints=websecure"
+      - "traefik.http.routers.frontend.tls.certresolver=letsencrypt"
+
+  # Backend - Node.js API Server
+  backend:
+    image: ${DOCKER_REGISTRY}/pacs-backend:${VERSION}
+    container_name: pacs-backend-prod
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=production
+      - PORT=5000
+      - MONGODB_URI=${MONGODB_URI}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - ORTHANC_URL=${ORTHANC_URL}
+      - ORTHANC_USERNAME=${ORTHANC_USERNAME}
+      - ORTHANC_PASSWORD=${ORTHANC_PASSWORD}
+      - SENDGRID_API_KEY=${SENDGRID_API_KEY}
+      - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID}
+      - TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN}
+      - REDIS_URL=${REDIS_URL}
+      - SIGNATURE_PRIVATE_KEY_PATH=/keys/signature-private.pem
+      - SIGNATURE_PUBLIC_KEY_PATH=/keys/signature-public.pem
+    volumes:
+      - ./keys:/keys:ro
+      - ./logs:/app/logs
+    networks:
+      - pacs-network
+    depends_on:
+      - mongodb
+      - redis
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend.rule=Host(`${API_DOMAIN}`)"
+      - "traefik.http.routers.backend.entrypoints=websecure"
+      - "traefik.http.routers.backend.tls.certresolver=letsencrypt"
+
+  # MongoDB Database
+  mongodb:
+    image: mongo:6.0
+    container_name: pacs-mongodb-prod
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_ROOT_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_ROOT_PASSWORD}
+      - MONGO_INITDB_DATABASE=pacs
+    volumes:
+      - mongodb-data:/data/db
+      - mongodb-config:/data/configdb
+      - ./mongodb/init:/docker-entrypoint-initdb.d:ro
+    networks:
+      - pacs-network
+    command: mongod --auth --bind_ip_all
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: pacs-redis-prod
+    restart: always
+    ports:
+      - "6379:6379"
+    command: redis-server --requirepass ${REDIS_PASSWORD} --maxmemory 2gb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis-data:/data
+    networks:
+      - pacs-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Orthanc DICOM Server
+  orthanc:
+    image: orthancteam/orthanc:latest
+    container_name: pacs-orthanc-prod
+    restart: always
+    ports:
+      - "4242:4242"  # DICOM
+      - "8042:8042"  # HTTP
+    environment:
+      - ORTHANC_NAME=PACS-Production
+      - ORTHANC_USERNAME=${ORTHANC_USERNAME}
+      - ORTHANC_PASSWORD=${ORTHANC_PASSWORD}
+    volumes:
+      - orthanc-data:/var/lib/orthanc/db
+      - ./orthanc/orthanc.json:/etc/orthanc/orthanc.json:ro
+    networks:
+      - pacs-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8042/system"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Traefik Load Balancer
+  traefik:
+    image: traefik:v2.10
+    container_name: pacs-traefik-prod
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"  # Dashboard
+    command:
+      - "--api.dashboard=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.letsencrypt.acme.email=${ACME_EMAIL}"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
+      - "--log.level=INFO"
+      - "--accesslog=true"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik-certs:/letsencrypt
+    networks:
+      - pacs-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dashboard.rule=Host(`${TRAEFIK_DOMAIN}`)"
+      - "traefik.http.routers.dashboard.service=api@internal"
+      - "traefik.http.routers.dashboard.middlewares=auth"
+      - "traefik.http.middlewares.auth.basicauth.users=${TRAEFIK_AUTH}"
+
+  # Prometheus Monitoring
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: pacs-prometheus-prod
+    restart: always
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=30d'
+    networks:
+      - pacs-network
+
+  # Grafana Dashboards
+  grafana:
+    image: grafana/grafana:latest
+    container_name: pacs-grafana-prod
+    restart: always
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
+      - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-simple-json-datasource
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    networks:
+      - pacs-network
+    depends_on:
+      - prometheus
+
+networks:
+  pacs-network:
+    driver: bridge
+
+volumes:
+  mongodb-data:
+  mongodb-config:
+  redis-data:
+  orthanc-data:
+  traefik-certs:
+  prometheus-data:
+  grafana-data:

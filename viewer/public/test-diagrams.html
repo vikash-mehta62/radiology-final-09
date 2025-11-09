@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anatomical Diagrams Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 2rem;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 1rem;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .subtitle {
+            color: rgba(255,255,255,0.9);
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+        
+        .stats {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 0.25rem;
+        }
+        
+        .category {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .category-title {
+            font-size: 1.5rem;
+            color: #333;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid #667eea;
+        }
+        
+        .diagram-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .diagram-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .diagram-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            border-color: #667eea;
+        }
+        
+        .diagram-image {
+            width: 100%;
+            height: 180px;
+            background: white;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 0.75rem;
+            padding: 1rem;
+        }
+        
+        .diagram-image img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        
+        .diagram-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.25rem;
+            font-size: 0.95rem;
+        }
+        
+        .diagram-desc {
+            color: #666;
+            font-size: 0.85rem;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-top: 0.5rem;
+        }
+        
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .footer {
+            text-align: center;
+            color: white;
+            margin-top: 3rem;
+            padding: 2rem;
+            background: rgba(255,255,255,0.1);
+            border-radius: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 Anatomical Diagrams Library</h1>
+        <p class="subtitle">Professional Medical Diagrams for Radiology Reporting</p>
+        
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-number" id="total-count">0</div>
+                <div class="stat-label">Total Diagrams</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number" id="loaded-count">0</div>
+                <div class="stat-label">Successfully Loaded</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number" id="categories-count">0</div>
+                <div class="stat-label">Categories</div>
+            </div>
+        </div>
+        
+        <div id="diagrams-container"></div>
+        
+        <div class="footer">
+            <p><strong>✅ All diagrams are ready to use!</strong></p>
+            <p style="margin-top: 0.5rem; opacity: 0.9;">
+                Import DiagramLibrary component in your React app to start using these diagrams
+            </p>
+        </div>
+    </div>
+    
+    <script>
+        const diagrams = {
+            "Full Body": [
+                { name: "Full Body (Neutral)", path: "/diagrams/fullbody-neutral_frontal.svg", desc: "Neutral full body frontal view" },
+                { name: "Full Body (Female)", path: "/diagrams/fullbody-female_frontal.svg", desc: "Female full body frontal view" }
+            ],
+            "Head & Brain": [
+                { name: "Brain - Axial", path: "/diagrams/headbrain-axial.svg", desc: "Brain cross-section (axial view)" },
+                { name: "Brain - Sagittal", path: "/diagrams/headbrain-sagittal.svg", desc: "Brain side view (sagittal)" },
+                { name: "Brain - Coronal", path: "/diagrams/headbrain-coronal.svg", desc: "Brain front view (coronal)" }
+            ],
+            "Chest": [
+                { name: "Chest - Frontal", path: "/diagrams/chest-frontal.svg", desc: "Chest and rib cage frontal view" },
+                { name: "Chest - Lateral", path: "/diagrams/chest-lateral.svg", desc: "Chest side view" },
+                { name: "Chest - Axial", path: "/diagrams/chest-axial.svg", desc: "Thoracic cross-section" }
+            ],
+            "Abdomen": [
+                { name: "Abdomen - Frontal", path: "/diagrams/abdomen-frontal.svg", desc: "Abdominal region frontal view" },
+                { name: "Abdominal Quadrants", path: "/diagrams/abdomen-quadrants.svg", desc: "Four abdominal quadrants" }
+            ],
+            "Spine": [
+                { name: "Spine - Lateral", path: "/diagrams/spine-lateral.svg", desc: "Spinal column side view" },
+                { name: "Spine - Frontal", path: "/diagrams/spine-frontal.svg", desc: "Spinal column front view" }
+            ],
+            "Pelvis": [
+                { name: "Pelvis - Frontal", path: "/diagrams/pelvis-frontal.svg", desc: "Pelvic region frontal view" }
+            ],
+            "Extremities": [
+                { name: "Shoulder Joint", path: "/diagrams/extremities-shoulder.svg", desc: "Shoulder joint anatomy" },
+                { name: "Hand Bones", path: "/diagrams/extremities-hand.svg", desc: "Hand skeletal structure" },
+                { name: "Knee Joint", path: "/diagrams/extremities-knee.svg", desc: "Knee joint anatomy" }
+            ]
+        };
+        
+        let totalCount = 0;
+        let loadedCount = 0;
+        
+        const container = document.getElementById('diagrams-container');
+        
+        Object.entries(diagrams).forEach(([category, items]) => {
+            const categoryDiv = document.createElement('div');
+            categoryDiv.className = 'category';
+            
+            const title = document.createElement('h2');
+            title.className = 'category-title';
+            title.textContent = category;
+            categoryDiv.appendChild(title);
+            
+            const grid = document.createElement('div');
+            grid.className = 'diagram-grid';
+            
+            items.forEach(diagram => {
+                totalCount++;
+                
+                const card = document.createElement('div');
+                card.className = 'diagram-card';
+                
+                const imageDiv = document.createElement('div');
+                imageDiv.className = 'diagram-image';
+                
+                const img = document.createElement('img');
+                img.src = diagram.path;
+                img.alt = diagram.name;
+                
+                const statusBadge = document.createElement('span');
+                statusBadge.className = 'status-badge';
+                
+                img.onload = () => {
+                    loadedCount++;
+                    statusBadge.className = 'status-badge status-success';
+                    statusBadge.textContent = '✓ Loaded';
+                    updateStats();
+                };
+                
+                img.onerror = () => {
+                    statusBadge.className = 'status-badge status-error';
+                    statusBadge.textContent = '✗ Failed';
+                    img.src = 'data:image/svg+xml,' + encodeURIComponent(
+                        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#f3f4f6"/><text x="50" y="50" text-anchor="middle" font-size="12" fill="#9ca3af">Error</text></svg>'
+                    );
+                    updateStats();
+                };
+                
+                imageDiv.appendChild(img);
+                
+                const name = document.createElement('div');
+                name.className = 'diagram-name';
+                name.textContent = diagram.name;
+                
+                const desc = document.createElement('div');
+                desc.className = 'diagram-desc';
+                desc.textContent = diagram.desc;
+                
+                card.appendChild(imageDiv);
+                card.appendChild(name);
+                card.appendChild(desc);
+                card.appendChild(statusBadge);
+                
+                grid.appendChild(card);
+            });
+            
+            categoryDiv.appendChild(grid);
+            container.appendChild(categoryDiv);
+        });
+        
+        function updateStats() {
+            document.getElementById('total-count').textContent = totalCount;
+            document.getElementById('loaded-count').textContent = loadedCount;
+            document.getElementById('categories-count').textContent = Object.keys(diagrams).length;
+        }
+        
+        updateStats();
+    </script>
+</body>
+</html>

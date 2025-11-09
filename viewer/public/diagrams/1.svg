@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500" width="400" height="500">
+  <!-- Simple Chest Frontal View Diagram -->
+  <defs>
+    <style>
+      .outline { fill: none; stroke: #333; stroke-width: 2; }
+      .organ { fill: #f0f0f0; stroke: #666; stroke-width: 1.5; }
+      .bone { fill: #e8e8e8; stroke: #999; stroke-width: 1; }
+      .label { font-family: Arial; font-size: 10px; fill: #666; }
+    </style>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="400" height="500" fill="#fafafa"/>
+  
+  <!-- Ribcage outline -->
+  <ellipse cx="200" cy="200" rx="120" ry="150" class="bone"/>
+  
+  <!-- Lungs -->
+  <ellipse cx="150" cy="180" rx="60" ry="100" class="organ"/>
+  <ellipse cx="250" cy="180" rx="60" ry="100" class="organ"/>
+  
+  <!-- Heart -->
+  <path d="M 180 220 Q 200 200 220 220 Q 230 240 200 270 Q 170 240 180 220" class="organ" fill="#ffcccc"/>
+  
+  <!-- Trachea -->
+  <rect x="195" y="50" width="10" height="100" class="organ"/>
+  
+  <!-- Clavicles -->
+  <path d="M 120 80 Q 160 70 200 75" class="bone"/>
+  <path d="M 280 80 Q 240 70 200 75" class="bone"/>
+  
+  <!-- Ribs (simplified) -->
+  <path d="M 120 120 Q 100 150 110 180" class="bone"/>
+  <path d="M 280 120 Q 300 150 290 180" class="bone"/>
+  <path d="M 120 160 Q 100 190 110 220" class="bone"/>
+  <path d="M 280 160 Q 300 190 290 220" class="bone"/>
+  
+  <!-- Labels -->
+  <text x="150" y="150" class="label">Right Lung</text>
+  <text x="230" y="150" class="label">Left Lung</text>
+  <text x="180" y="250" class="label">Heart</text>
+  <text x="180" y="40" class="label">Trachea</text>
+  
+  <!-- Anatomical markers -->
+  <text x="10" y="100" class="label">Superior</text>
+  <text x="10" y="450" class="label">Inferior</text>
+  <text x="10" y="250" class="label">Right</text>
+  <text x="360" y="250" class="label">Left</text>
+</svg>

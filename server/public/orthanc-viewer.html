@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DICOM Viewer - Orthanc Integration</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            color: #667eea;
+            font-size: 28px;
+        }
+        
+        .stats {
+            display: flex;
+            gap: 30px;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+        }
+        
+        .search-box {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .studies-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+        
+        .study-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+        
+        .study-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+        
+        .study-preview {
+            width: 100%;
+            height: 200px;
+            background: #f5f5f5;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        
+        .study-preview img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        
+        .study-info {
+            margin-bottom: 10px;
+        }
+        
+        .patient-name {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .patient-id {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .study-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            font-size: 13px;
+        }
+        
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .detail-label {
+            color: #999;
+            font-size: 11px;
+            text-transform: uppercase;
+            margin-bottom: 2px;
+        }
+        
+        .detail-value {
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .modality-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: #667eea;
+            color: white;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 60px;
+            color: white;
+            font-size: 20px;
+        }
+        
+        .error {
+            background: #ff4444;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px;
+            color: white;
+        }
+        
+        .empty-state h2 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .modal-content {
+            background: white;
+            max-width: 1200px;
+            margin: 40px auto;
+            border-radius: 15px;
+            padding: 30px;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .close-btn {
+            background: #ff4444;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        .series-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .series-card {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 10px;
+        }
+        
+        .series-preview {
+            width: 100%;
+            height: 150px;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        
+        .series-preview img {
+            max-width: 100%;
+            max-height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏥 DICOM Viewer</h1>
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="totalStudies">-</div>
+                    <div class="stat-label">Studies</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="totalSeries">-</div>
+                    <div class="stat-label">Series</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="totalInstances">-</div>
+                    <div class="stat-label">Images</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="search-box">
+            <input type="text" class="search-input" id="searchInput" placeholder="🔍 Search by patient name, ID, or study description...">
+        </div>
+        
+        <div id="errorContainer"></div>
+        <div id="loadingContainer" class="loading">Loading studies...</div>
+        <div id="studiesContainer" class="studies-grid"></div>
+    </div>
+    
+    <div id="studyModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Study Details</h2>
+                <button class="close-btn" onclick="closeModal()">Close</button>
+            </div>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+    
+    <script>
+        const API_BASE = '/api/viewer';
+        const ORTHANC_BASE = 'http://69.62.70.102:8042';
+        const ORTHANC_AUTH = btoa('orthanc:orthanc_secure_2024');
+        
+        let allStudies = [];
+        
+        // Load studies on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            loadStudies();
+            loadStats();
+            
+            // Search functionality
+            document.getElementById('searchInput').addEventListener('input', (e) => {
+                const query = e.target.value.toLowerCase();
+                filterStudies(query);
+            });
+        });
+        
+        async function loadStudies() {
+            try {
+                document.getElementById('loadingContainer').style.display = 'block';
+                document.getElementById('studiesContainer').innerHTML = '';
+                
+                const response = await fetch(`${API_BASE}/studies`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    allStudies = data.studies;
+                    displayStudies(allStudies);
+                } else {
+                    showError('Failed to load studies');
+                }
+            } catch (error) {
+                showError('Error connecting to server: ' + error.message);
+            } finally {
+                document.getElementById('loadingContainer').style.display = 'none';
+            }
+        }
+        
+        async function loadStats() {
+            try {
+                const response = await fetch(`${API_BASE}/stats`);
+                const data = await response.json();
+                
+                if (data.success && data.statistics) {
+                    document.getElementById('totalStudies').textContent = data.statistics.CountStudies || 0;
+                    document.getElementById('totalSeries').textContent = data.statistics.CountSeries || 0;
+                    document.getElementById('totalInstances').textContent = data.statistics.CountInstances || 0;
+                }
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+        
+        function displayStudies(studies) {
+            const container = document.getElementById('studiesContainer');
+            
+            if (studies.length === 0) {
+                container.innerHTML = '<div class="empty-state"><h2>No studies found</h2><p>Upload DICOM files to Orthanc to get started</p></div>';
+                return;
+            }
+            
+            container.innerHTML = studies.map(study => `
+                <div class="study-card" onclick="viewStudy('${study.id}')">
+                    <div class="study-preview">
+                        ${study.series && study.series[0] ? 
+                            `<img src="${ORTHANC_BASE}/series/${study.series[0]}/preview" 
+                                  onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><text x=%2250%%22 y=%2250%%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2220%22 fill=%22%23999%22>No Preview</text></svg>'"
+                                  crossorigin="use-credentials">` 
+                            : '<span style="color: #999;">No Preview</span>'}
+                    </div>
+                    <div class="study-info">
+                        <div class="patient-name">${study.patientName || 'Unknown'}</div>
+                        <div class="patient-id">ID: ${study.patientID || 'Unknown'}</div>
+                        <div class="study-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Date</span>
+                                <span class="detail-value">${formatDate(study.studyDate)}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Modality</span>
+                                <span class="detail-value"><span class="modality-badge">${study.modality || 'N/A'}</span></span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Series</span>
+                                <span class="detail-value">${study.seriesCount || 0}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Images</span>
+                                <span class="detail-value">${study.instancesCount || 0}</span>
+                            </div>
+                        </div>
+                        ${study.studyDescription ? `<div style="margin-top: 10px; color: #666; font-size: 13px;">${study.studyDescription}</div>` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function filterStudies(query) {
+            if (!query) {
+                displayStudies(allStudies);
+                return;
+            }
+            
+            const filtered = allStudies.filter(study => 
+                (study.patientName || '').toLowerCase().includes(query) ||
+                (study.patientID || '').toLowerCase().includes(query) ||
+                (study.studyDescription || '').toLowerCase().includes(query)
+            );
+            
+            displayStudies(filtered);
+        }
+        
+        async function viewStudy(studyId) {
+            try {
+                const response = await fetch(`${API_BASE}/studies/${studyId}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    showStudyModal(data.study);
+                } else {
+                    showError('Failed to load study details');
+                }
+            } catch (error) {
+                showError('Error loading study: ' + error.message);
+            }
+        }
+        
+        function showStudyModal(study) {
+            const modal = document.getElementById('studyModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalBody = document.getElementById('modalBody');
+            
+            modalTitle.textContent = `${study.patientName} - ${formatDate(study.studyDate)}`;
+            
+            modalBody.innerHTML = `
+                <div style="margin-bottom: 20px;">
+                    <h3>Study Information</h3>
+                    <p><strong>Patient ID:</strong> ${study.patientID}</p>
+                    <p><strong>Study Date:</strong> ${formatDate(study.studyDate)} ${study.studyTime || ''}</p>
+                    <p><strong>Description:</strong> ${study.studyDescription || 'N/A'}</p>
+                    <p><strong>Modality:</strong> ${study.modality || 'N/A'}</p>
+                </div>
+                
+                <h3>Series (${study.seriesDetails ? study.seriesDetails.length : 0})</h3>
+                <div class="series-grid">
+                    ${study.seriesDetails ? study.seriesDetails.map(series => `
+                        <div class="series-card">
+                            <div class="series-preview">
+                                <img src="${ORTHANC_BASE}/series/${series.id}/preview" 
+                                     onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22150%22 height=%22150%22><text x=%2250%%22 y=%2250%%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2216%22 fill=%22%23999%22>No Preview</text></svg>'"
+                                     crossorigin="use-credentials">
+                            </div>
+                            <div><strong>${series.seriesDescription || 'Series ' + series.seriesNumber}</strong></div>
+                            <div style="font-size: 12px; color: #666;">${series.instancesCount} images</div>
+                            <div style="font-size: 12px; color: #666;">${series.modality}</div>
+                        </div>
+                    `).join('') : '<p>No series found</p>'}
+                </div>
+            `;
+            
+            modal.style.display = 'block';
+        }
+        
+        function closeModal() {
+            document.getElementById('studyModal').style.display = 'none';
+        }
+        
+        function formatDate(dateStr) {
+            if (!dateStr) return 'N/A';
+            const year = dateStr.substring(0, 4);
+            const month = dateStr.substring(4, 6);
+            const day = dateStr.substring(6, 8);
+            return `${day}/${month}/${year}`;
+        }
+        
+        function showError(message) {
+            const container = document.getElementById('errorContainer');
+            container.innerHTML = `<div class="error">${message}</div>`;
+            setTimeout(() => {
+                container.innerHTML = '';
+            }, 5000);
+        }
+        
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('studyModal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,191 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "FHIR DiagnosticReport",
+  "description": "Minimal schema for FHIR DiagnosticReport validation (client-side contract stub)",
+  "type": "object",
+  "required": ["resourceType", "status", "code", "subject"],
+  "properties": {
+    "resourceType": {
+      "type": "string",
+      "const": "DiagnosticReport",
+      "description": "FHIR resource type"
+    },
+    "id": {
+      "type": "string",
+      "description": "Logical id of this artifact",
+      "pattern": "^[A-Za-z0-9\\-\\.]{1,64}$"
+    },
+    "meta": {
+      "type": "object",
+      "properties": {
+        "versionId": { "type": "string" },
+        "lastUpdated": { "type": "string", "format": "date-time" },
+        "profile": {
+          "type": "array",
+          "items": { "type": "string", "format": "uri" }
+        }
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": ["registered", "partial", "preliminary", "final", "amended", "corrected", "appended", "cancelled", "entered-in-error", "unknown"],
+      "description": "Report status"
+    },
+    "category": {
+      "type": "array",
+      "description": "Service category",
+      "items": {
+        "type": "object",
+        "properties": {
+          "coding": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "system": { "type": "string", "format": "uri" },
+                "code": { "type": "string" },
+                "display": { "type": "string" }
+              }
+            }
+          },
+          "text": { "type": "string" }
+        }
+      }
+    },
+    "code": {
+      "type": "object",
+      "description": "Name/Code for this diagnostic report",
+      "required": ["coding"],
+      "properties": {
+        "coding": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["system", "code"],
+            "properties": {
+              "system": { "type": "string", "format": "uri" },
+              "code": { "type": "string" },
+              "display": { "type": "string" }
+            }
+          }
+        },
+        "text": { "type": "string" }
+      }
+    },
+    "subject": {
+      "type": "object",
+      "description": "The subject of the report (patient)",
+      "required": ["reference"],
+      "properties": {
+        "reference": { "type": "string", "pattern": "^Patient/[A-Za-z0-9\\-\\.]+$" },
+        "display": { "type": "string" }
+      }
+    },
+    "encounter": {
+      "type": "object",
+      "description": "Health care event when test ordered",
+      "properties": {
+        "reference": { "type": "string", "pattern": "^Encounter/[A-Za-z0-9\\-\\.]+$" }
+      }
+    },
+    "effectiveDateTime": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Clinically relevant time/time-period for report"
+    },
+    "issued": {
+      "type": "string",
+      "format": "date-time",
+      "description": "DateTime this version was made"
+    },
+    "performer": {
+      "type": "array",
+      "description": "Responsible Diagnostic Service",
+      "items": {
+        "type": "object",
+        "properties": {
+          "reference": { "type": "string" },
+          "display": { "type": "string" }
+        }
+      }
+    },
+    "resultsInterpreter": {
+      "type": "array",
+      "description": "Primary result interpreter",
+      "items": {
+        "type": "object",
+        "properties": {
+          "reference": { "type": "string", "pattern": "^Practitioner/[A-Za-z0-9\\-\\.]+$" },
+          "display": { "type": "string" }
+        }
+      }
+    },
+    "specimen": {
+      "type": "array",
+      "description": "Specimens this report is based on",
+      "items": {
+        "type": "object",
+        "properties": {
+          "reference": { "type": "string", "pattern": "^Specimen/[A-Za-z0-9\\-\\.]+$" }
+        }
+      }
+    },
+    "result": {
+      "type": "array",
+      "description": "Observations",
+      "items": {
+        "type": "object",
+        "properties": {
+          "reference": { "type": "string", "pattern": "^Observation/[A-Za-z0-9\\-\\.]+$" }
+        }
+      }
+    },
+    "imagingStudy": {
+      "type": "array",
+      "description": "Reference to full details of imaging associated with the diagnostic report",
+      "items": {
+        "type": "object",
+        "properties": {
+          "reference": { "type": "string", "pattern": "^ImagingStudy/[A-Za-z0-9\\-\\.]+$" }
+        }
+      }
+    },
+    "conclusion": {
+      "type": "string",
+      "description": "Clinical conclusion (interpretation) of test results"
+    },
+    "conclusionCode": {
+      "type": "array",
+      "description": "Codes for the clinical conclusion of test results",
+      "items": {
+        "type": "object",
+        "properties": {
+          "coding": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "system": { "type": "string", "format": "uri" },
+                "code": { "type": "string" },
+                "display": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "presentedForm": {
+      "type": "array",
+      "description": "Entire report as issued",
+      "items": {
+        "type": "object",
+        "properties": {
+          "contentType": { "type": "string" },
+          "data": { "type": "string", "contentEncoding": "base64" },
+          "title": { "type": "string" }
+        }
+      }
+    }
+  }
+}

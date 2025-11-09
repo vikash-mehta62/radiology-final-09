@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DICOM Viewer - Rubo DEMO (XA Study)</title>
+    <meta name="description" content="Advanced medical imaging viewer with AI-powered analysis" />
+    
+    <!-- Preconnect to external domains for performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    
+    <!-- Material UI Roboto font -->
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&display=swap"
+    />
+    
+    <!-- Material UI icons -->
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+    />
+    
+    <!-- Security headers -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' http://localhost:8001 http://localhost:5001 http://localhost:5002 ws: wss:;" />
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <meta http-equiv="X-Frame-Options" content="DENY" />
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block" />
+    
+    <!-- Global CSS for proper scrolling -->
+    <style>
+      html, body {
+        margin: 0;
+        padding: 0;
+        height: auto !important;
+        overflow: auto !important;
+        scroll-behavior: smooth;
+      }
+      
+      #root {
+        min-height: 100vh;
+        overflow: visible;
+      }
+      
+      /* Ensure no components block scrolling */
+      * {
+        scroll-behavior: smooth;
+      }
+      
+      /* Fix for any fixed positioning issues */
+      .MuiBox-root {
+        overflow: visible !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

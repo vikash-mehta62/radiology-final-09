@@ -1,0 +1,49 @@
+# Docker Compose override for Nginx TLS termination
+# Use with: docker-compose -f docker-compose.yml -f nginx-config/docker-compose.nginx.yml up
+
+version: '3.8'
+
+services:
+  # Nginx reverse proxy with TLS termination
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: nginx-tls-proxy
+    restart: unless-stopped
+    ports:
+      - "80:80"    # HTTP (redirects to HTTPS)
+      - "443:443"  # HTTPS
+    volumes:
+      - ./nginx-config/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx-config/certs:/etc/nginx/certs:ro
+      - ./nginx-config/logs:/var/log/nginx
+      - ./nginx-config/dhparam.pem:/etc/nginx/dhparam.pem:ro
+    depends_on:
+      - orthanc
+      - dicom-bridge
+    networks:
+      - orthanc-bridge-network
+    healthcheck:
+      test: ["CMD", "nginx", "-t"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    environment:
+      - NGINX_ENVSUBST_OUTPUT_DIR=/etc/nginx
+    command: >
+      sh -c "nginx -g 'daemon off;'"
+
+  # Update Orthanc to not expose ports directly (behind proxy)
+  orthanc:
+    ports: []  # Remove direct port exposure
+    
+  # Update Bridge to not expose ports directly (behind proxy)  
+  dicom-bridge:
+    ports: []  # Remove direct port exposure
+
+# Additional network configuration for TLS
+networks:
+  orthanc-bridge-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

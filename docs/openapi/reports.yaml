@@ -1,0 +1,608 @@
+openapi: 3.0.3
+info:
+  title: Unified Reporting API
+  description: Single consolidated API for all structured reporting functionality
+  version: 1.0.0
+  contact:
+    name: Medical Imaging Team
+    email: team@example.com
+
+servers:
+  - url: http://localhost:8001/api/reports
+    description: Development server
+  - url: https://api.example.com/api/reports
+    description: Production server
+
+tags:
+  - name: Reports
+    description: Report CRUD operations
+  - name: Templates
+    description: Template management
+  - name: Workflow
+    description: Report workflow (finalize, sign, addendum)
+  - name: Export
+    description: Export operations
+
+paths:
+  /:
+    post:
+      tags:
+        - Reports
+      summary: Create or update report (upsert)
+      description: Creates a new report or updates an existing draft
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StructuredReport'
+      responses:
+        '200':
+          description: Report created/updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportResponse'
+        '400':
+          description: Invalid request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+
+  /{reportId}:
+    get:
+      tags:
+        - Reports
+      summary: Get report by ID
+      parameters:
+        - name: reportId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Report retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportResponse'
+        '404':
+          description: Report not found
+
+    put:
+      tags:
+        - Reports
+      summary: Update existing report
+      parameters:
+        - name: reportId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StructuredReport'
+      responses:
+        '200':
+          description: Report updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportResponse'
+        '409':
+          description: Version conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VersionConflict'
+
+    delete:
+      tags:
+        - Reports
+      summary: Delete draft report
+      parameters:
+        - name: reportId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Report deleted successfully
+        '400':
+          description: Only draft reports can be deleted
+
+  /study/{studyInstanceUID}:
+    get:
+      tags:
+        - Reports
+      summary: Get all reports for a study
+      parameters:
+        - name: studyInstanceUID
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Reports retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  count:
+                    type: integer
+                  reports:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/StructuredReport'
+
+  /patient/{patientID}:
+    get:
+      tags:
+        - Reports
+      summary: Get all reports for a patient
+      parameters:
+        - name: patientID
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: Reports retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  count:
+                    type: integer
+                  reports:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/StructuredReport'
+
+  /templates:
+    get:
+      tags:
+        - Templates
+      summary: Get all templates
+      parameters:
+        - name: active
+          in: query
+          schema:
+            type: boolean
+            default: true
+      responses:
+        '200':
+          description: Templates retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  templates:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ReportTemplate'
+                  count:
+                    type: integer
+
+  /templates/suggest:
+    post:
+      tags:
+        - Templates
+      summary: Auto-suggest best template
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                modality:
+                  type: string
+                  example: CT
+                studyDescription:
+                  type: string
+                  example: Chest CT with contrast
+                aiSummary:
+                  type: string
+      responses:
+        '200':
+          description: Template suggestion returned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  template:
+                    $ref: '#/components/schemas/ReportTemplate'
+                  matchScore:
+                    type: number
+                  matchDetails:
+                    type: object
+
+  /{reportId}/finalize:
+    post:
+      tags:
+        - Workflow
+      summary: Finalize report (draft → preliminary)
+      parameters:
+        - name: reportId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Report finalized successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportResponse'
+
+  /{reportId}/sign:
+    post:
+      tags:
+        - Workflow
+      summary: Sign and finalize report
+      parameters:
+        - name: reportId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                signature:
+                  type: string
+                  format: binary
+                signatureText:
+                  type: string
+                signatureHash:
+                  type: string
+      responses:
+        '200':
+          description: Report signed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportResponse'
+
+  /{reportId}/addendum:
+    post:
+      tags:
+        - Workflow
+      summary: Add addendum to final report
+      parameters:
+        - name: reportId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - content
+              properties:
+                content:
+                  type: string
+                reason:
+                  type: string
+      responses:
+        '200':
+          description: Addendum added successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportResponse'
+
+  /{reportId}/export:
+    get:
+      tags:
+        - Export
+      summary: Export report in specified format
+      parameters:
+        - name: reportId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: format
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [pdf, dicom-sr, fhir, json]
+      responses:
+        '200':
+          description: Report exported successfully
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+            application/dicom:
+              schema:
+                type: string
+                format: binary
+            application/fhir+json:
+              schema:
+                type: object
+            application/json:
+              schema:
+                type: object
+
+  /{reportId}/export/pdf:
+    post:
+      tags:
+        - Export
+      summary: Export report as PDF with options
+      parameters:
+        - name: reportId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                includeImages:
+                  type: boolean
+                includeSignature:
+                  type: boolean
+      responses:
+        '200':
+          description: PDF generated successfully
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+
+  /{reportId}/export/dicom-sr:
+    post:
+      tags:
+        - Export
+      summary: Export report as DICOM SR
+      parameters:
+        - name: reportId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: DICOM SR generated successfully
+          content:
+            application/dicom:
+              schema:
+                type: string
+                format: binary
+
+  /{reportId}/export/fhir:
+    post:
+      tags:
+        - Export
+      summary: Export report as FHIR DiagnosticReport
+      parameters:
+        - name: reportId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: FHIR report generated successfully
+          content:
+            application/fhir+json:
+              schema:
+                type: object
+
+components:
+  schemas:
+    StructuredReport:
+      type: object
+      required:
+        - studyInstanceUID
+        - patientID
+        - reportStatus
+        - findings
+      properties:
+        reportId:
+          type: string
+        studyInstanceUID:
+          type: string
+        patientID:
+          type: string
+        patientName:
+          type: string
+        modality:
+          type: string
+        templateId:
+          type: string
+        templateName:
+          type: string
+        sections:
+          type: object
+          additionalProperties:
+            type: string
+        clinicalHistory:
+          type: string
+        technique:
+          type: string
+        findingsText:
+          type: string
+        impression:
+          type: string
+        recommendations:
+          type: string
+        findings:
+          type: array
+          items:
+            $ref: '#/components/schemas/StructuredFinding'
+        measurements:
+          type: array
+          items:
+            type: object
+        annotations:
+          type: array
+          items:
+            type: object
+        keyImages:
+          type: array
+          items:
+            type: object
+        aiAnalysisId:
+          type: string
+        aiAssisted:
+          type: boolean
+        creationMode:
+          type: string
+          enum: [manual, ai-assisted, quick]
+        reportStatus:
+          type: string
+          enum: [draft, preliminary, final, amended, cancelled]
+        version:
+          type: integer
+        radiologistSignature:
+          type: string
+        signedAt:
+          type: string
+          format: date-time
+
+    StructuredFinding:
+      type: object
+      required:
+        - id
+        - type
+        - description
+        - severity
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum: [finding, impression, recommendation, critical]
+        category:
+          type: string
+        description:
+          type: string
+        severity:
+          type: string
+          enum: [normal, mild, moderate, severe, critical]
+        location:
+          type: string
+        aiDetected:
+          type: boolean
+        coordinates:
+          type: object
+          properties:
+            x:
+              type: number
+            y:
+              type: number
+            width:
+              type: number
+            height:
+              type: number
+
+    ReportTemplate:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        category:
+          type: string
+        modality:
+          type: string
+        description:
+          type: string
+        sections:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              label:
+                type: string
+              type:
+                type: string
+                enum: [text, textarea, select, multiselect]
+              required:
+                type: boolean
+              defaultValue:
+                type: string
+        active:
+          type: boolean
+
+    ReportResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        report:
+          $ref: '#/components/schemas/StructuredReport'
+        message:
+          type: string
+        error:
+          type: string
+
+    VersionConflict:
+      type: object
+      properties:
+        serverVersion:
+          type: integer
+        clientVersion:
+          type: integer
+        serverReport:
+          $ref: '#/components/schemas/StructuredReport'
+        conflictFields:
+          type: array
+          items:
+            type: string
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - bearerAuth: []

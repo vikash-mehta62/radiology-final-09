@@ -1,0 +1,44 @@
+[
+  {
+    "bodyPart": "FullBody",
+    "view": "neutral_frontal",
+    "requested": "File:Human_body_silhouette.svg",
+    "resolvedTo": null,
+    "status": "skipped"
+  },
+  {
+    "bodyPart": "FullBody",
+    "view": "female_frontal",
+    "requested": "File:Silhouette_of_a_woman.svg",
+    "resolvedTo": null,
+    "status": "skipped"
+  },
+  {
+    "bodyPart": "Chest",
+    "view": "frontal",
+    "requested": "File:Rib_cage_icon.svg",
+    "resolvedTo": null,
+    "status": "skipped"
+  },
+  {
+    "bodyPart": "Chest",
+    "view": "lateral",
+    "requested": "File:Human_thorax_lateral_view_silhouette.svg",
+    "resolvedTo": null,
+    "status": "skipped"
+  },
+  {
+    "bodyPart": "Chest",
+    "view": "axial",
+    "requested": "File:Spinal_cord_-_Thoracic_cross_section.svg",
+    "resolvedTo": null,
+    "status": "skipped"
+  },
+  {
+    "bodyPart": "Extremities",
+    "view": "shoulder",
+    "requested": "File:Shoulder_joint.svg",
+    "resolvedTo": null,
+    "status": "skipped"
+  }
+]

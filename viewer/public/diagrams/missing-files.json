@@ -1,0 +1,112 @@
+[
+  {
+    "bodyPart": "HeadBrain",
+    "view": "axial",
+    "requested": "File:Brain_axial_section.svg",
+    "tried": [
+      "File:Brain_axial_section.svg"
+    ]
+  },
+  {
+    "bodyPart": "HeadBrain",
+    "view": "sagittal",
+    "requested": "File:Brain_sagittal_section.svg",
+    "tried": [
+      "File:Brain_sagittal_section.svg",
+      "File:Neural development",
+      "File:Brain",
+      "File:Popular Science Monthly illustrations/Categories"
+    ]
+  },
+  {
+    "bodyPart": "HeadBrain",
+    "view": "coronal",
+    "requested": "File:Brain_coronal_section.svg",
+    "tried": [
+      "File:Brain_coronal_section.svg",
+      "File:Brain",
+      "File:Gyri"
+    ]
+  },
+  {
+    "bodyPart": "Abdomen",
+    "view": "frontal",
+    "requested": "File:Abdomen_silhouette.svg",
+    "tried": [
+      "File:Abdomen_silhouette.svg",
+      "File:History of corsets"
+    ]
+  },
+  {
+    "bodyPart": "Abdomen",
+    "view": "quadrants",
+    "requested": "File:Abdominal_quadrants.svg",
+    "tried": [
+      "File:Abdominal_quadrants.svg"
+    ]
+  },
+  {
+    "bodyPart": "Spine",
+    "view": "lateral",
+    "requested": "File:Spine_simple.svg",
+    "tried": [
+      "File:Spine_simple.svg",
+      "File:Gasterosteus aculeatus",
+      "File:Carissa spinarum",
+      "File:Ceiba pentandra",
+      "File:Paintings in the Auckland Art Gallery"
+    ]
+  },
+  {
+    "bodyPart": "Spine",
+    "view": "frontal",
+    "requested": "File:Human_spine_diagram.svg",
+    "tried": [
+      "File:Human_spine_diagram.svg",
+      "File:Human body diagrams/Organs",
+      "File:Popular Science Monthly illustrations/Categories"
+    ]
+  },
+  {
+    "bodyPart": "Pelvis",
+    "view": "frontal",
+    "requested": "File:Pelvis_icon.svg",
+    "tried": [
+      "File:Pelvis_icon.svg",
+      "File:Leiden University Library",
+      "File:Paintings in the Indianapolis Museum of Art"
+    ]
+  },
+  {
+    "bodyPart": "Extremities",
+    "view": "hand",
+    "requested": "File:Hand_bones.svg",
+    "tried": [
+      "File:Hand_bones.svg",
+      "File:Hand",
+      "File:Human body diagrams/Organs",
+      "File:Homology",
+      "File:Arm",
+      "File:Çatalhöyük",
+      "File:Handicraft",
+      "File:Flags with people",
+      "File:KITLV A130"
+    ]
+  },
+  {
+    "bodyPart": "Extremities",
+    "view": "knee",
+    "requested": "File:Knee_icon.svg",
+    "tried": [
+      "File:Knee_icon.svg",
+      "File:Karate",
+      "File:Human-powered transport",
+      "File:Skirt",
+      "File:Bathing",
+      "File:Paintings in the Ashmolean Museum",
+      "File:Paintings in the Walker Art Gallery, Liverpool",
+      "File:Paintings by El Greco",
+      "File:Paintings by Jean-Baptiste-Camille Corot"
+    ]
+  }
+]

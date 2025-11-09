@@ -1,0 +1,105 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DICOM Structured Report",
+  "description": "Minimal schema for DICOM SR validation (client-side contract stub)",
+  "type": "object",
+  "required": ["SOPClassUID", "SOPInstanceUID", "StudyInstanceUID", "SeriesInstanceUID", "Modality", "ContentSequence"],
+  "properties": {
+    "SOPClassUID": {
+      "type": "string",
+      "description": "SOP Class UID for Structured Report",
+      "pattern": "^1\\.2\\.840\\.10008\\.5\\.1\\.4\\.1\\.1\\.(88|131)\\.[0-9]+$"
+    },
+    "SOPInstanceUID": {
+      "type": "string",
+      "description": "Unique identifier for this SR instance",
+      "pattern": "^[0-9\\.]+$"
+    },
+    "StudyInstanceUID": {
+      "type": "string",
+      "description": "Study Instance UID",
+      "pattern": "^[0-9\\.]+$"
+    },
+    "SeriesInstanceUID": {
+      "type": "string",
+      "description": "Series Instance UID",
+      "pattern": "^[0-9\\.]+$"
+    },
+    "Modality": {
+      "type": "string",
+      "description": "Modality type",
+      "enum": ["SR"]
+    },
+    "ContentSequence": {
+      "type": "array",
+      "description": "Content tree of the structured report",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["ValueType"],
+        "properties": {
+          "ValueType": {
+            "type": "string",
+            "enum": ["CONTAINER", "TEXT", "CODE", "NUM", "DATE", "TIME", "DATETIME", "PNAME", "UIDREF", "COMPOSITE", "IMAGE", "WAVEFORM"]
+          },
+          "ConceptNameCodeSequence": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["CodeValue", "CodingSchemeDesignator", "CodeMeaning"],
+              "properties": {
+                "CodeValue": { "type": "string" },
+                "CodingSchemeDesignator": { "type": "string" },
+                "CodeMeaning": { "type": "string" }
+              }
+            }
+          },
+          "TextValue": {
+            "type": "string",
+            "description": "Text content for TEXT value type"
+          },
+          "ContentSequence": {
+            "type": "array",
+            "description": "Nested content items",
+            "items": { "$ref": "#/properties/ContentSequence/items" }
+          }
+        }
+      }
+    },
+    "PatientName": {
+      "type": "string",
+      "description": "Patient's name"
+    },
+    "PatientID": {
+      "type": "string",
+      "description": "Patient identifier"
+    },
+    "StudyDate": {
+      "type": "string",
+      "description": "Study date (YYYYMMDD)",
+      "pattern": "^[0-9]{8}$"
+    },
+    "StudyTime": {
+      "type": "string",
+      "description": "Study time (HHMMSS)",
+      "pattern": "^[0-9]{6}(\\.[0-9]+)?$"
+    },
+    "AccessionNumber": {
+      "type": "string",
+      "description": "Accession number"
+    },
+    "VerifyingObserverSequence": {
+      "type": "array",
+      "description": "Observers who verified the report",
+      "items": {
+        "type": "object",
+        "required": ["VerifyingObserverName", "VerificationDateTime"],
+        "properties": {
+          "VerifyingObserverName": { "type": "string" },
+          "VerificationDateTime": { "type": "string" },
+          "VerifyingOrganization": { "type": "string" }
+        }
+      }
+    }
+  }
+}

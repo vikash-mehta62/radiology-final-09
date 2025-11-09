@@ -1,0 +1,178 @@
+groups:
+- name: orthanc-bridge-alerts
+  rules:
+  
+  # Queue Depth Alerts
+  - alert: HighQueueDepth
+    expr: orthanc_bridge_queue_depth > 100
+    for: 5m
+    labels:
+      severity: warning
+      service: orthanc-bridge
+    annotations:
+      summary: "High queue depth detected"
+      description: "Queue depth is {{ $value }} which is above the threshold of 100 for more than 5 minutes"
+      runbook_url: "https://docs.orthanc-bridge.local/runbooks/high-queue-depth"
+
+  - alert: CriticalQueueDepth
+    expr: orthanc_bridge_queue_depth > 500
+    for: 2m
+    labels:
+      severity: critical
+      service: orthanc-bridge
+    annotations:
+      summary: "Critical queue depth detected"
+      description: "Queue depth is {{ $value }} which is critically high (>500) for more than 2 minutes"
+      runbook_url: "https://docs.orthanc-bridge.local/runbooks/critical-queue-depth"
+
+  # Job Failure Rate Alerts
+  - alert: HighJobFailureRate
+    expr: rate(orthanc_bridge_job_failures_total[5m]) > 0.1
+    for: 3m
+    labels:
+      severity: warning
+      service: orthanc-bridge
+    annotations:
+      summary: "High job failure rate detected"
+      description: "Job failure rate is {{ $value | humanizePercentage }} over the last 5 minutes"
+      runbook_url: "https://docs.orthanc-bridge.local/runbooks/high-failure-rate"
+
+  - alert: CriticalJobFailureRate
+    expr: rate(orthanc_bridge_job_failures_total[5m]) > 0.5
+    for: 1m
+    labels:
+      severity: critical
+      service: orthanc-bridge
+    annotations:
+      summary: "Critical job failure rate detected"
+      description: "Job failure rate is {{ $value | humanizePercentage }} which is critically high (>50%)"
+      runbook_url: "https://docs.orthanc-bridge.local/runbooks/critical-failure-rate"
+
+  # Processing Time Alerts
+  - alert: SlowProcessingTime
+    expr: histogram_quantile(0.95, rate(orthanc_bridge_processing_time_seconds_bucket[5m])) > 30
+    for: 5m
+    labels:
+      severity: warning
+      service: orthanc-bridge
+    annotations:
+      summary: "Slow processing time detected"
+      description: "95th percentile processing time is {{ $value }}s which is above 30s threshold"
+      runbook_url: "https://docs.orthanc-bridge.local/runbooks/slow-processing"
+
+  # Orthanc Connectivity Alerts
+  - alert: OrthancDown
+    expr: orthanc_bridge_orthanc_connectivity == 0
+    for: 1m
+    labels:
+      severity: critical
+      service: orthanc-bridge
+    annotations:
+      summary: "Orthanc server is down"
+      description: "Cannot connect to Orthanc server for more than 1 minute"
+      runbook_url: "https://docs.orthanc-bridge.local/runbooks/orthanc-down"
+
+  # Database Connectivity Alerts
+  - alert: DatabaseDown
+    expr: orthanc_bridge_database_connectivity == 0
+    for: 1m
+    labels:
+      severity: critical
+      service: orthanc-bridge
+    annotations:
+      summary: "Database is down"
+      description: "Cannot connect to database for more than 1 minute"
+      runbook_url: "https://docs.orthanc-bridge.local/runbooks/database-down"
+
+  # Throughput Alerts
+  - alert: LowThroughput
+    expr: orthanc_bridge_throughput_instances_per_minute{time_window="5m"} < 1
+    for: 10m
+    labels:
+      severity: warning
+      service: orthanc-bridge
+    annotations:
+      summary: "Low throughput detected"
+      description: "Processing throughput is {{ $value }} instances/minute which is below expected levels"
+      runbook_url: "https://docs.orthanc-bridge.local/runbooks/low-throughput"
+
+  - alert: NoThroughput
+    expr: orthanc_bridge_throughput_instances_per_minute{time_window="1m"} == 0
+    for: 5m
+    labels:
+      severity: critical
+      service: orthanc-bridge
+    annotations:
+      summary: "No processing throughput"
+      description: "No instances have been processed in the last 5 minutes"
+      runbook_url: "https://docs.orthanc-bridge.local/runbooks/no-throughput"
+
+  # System Resource Alerts
+  - alert: HighMemoryUsage
+    expr: (orthanc_bridge_process_resident_memory_bytes / orthanc_bridge_process_virtual_memory_max_bytes) > 0.8
+    for: 5m
+    labels:
+      severity: warning
+      service: orthanc-bridge
+    annotations:
+      summary: "High memory usage detected"
+      description: "Memory usage is {{ $value | humanizePercentage }} which is above 80%"
+      runbook_url: "https://docs.orthanc-bridge.local/runbooks/high-memory"
+
+  - alert: CriticalMemoryUsage
+    expr: (orthanc_bridge_process_resident_memory_bytes / orthanc_bridge_process_virtual_memory_max_bytes) > 0.95
+    for: 2m
+    labels:
+      severity: critical
+      service: orthanc-bridge
+    annotations:
+      summary: "Critical memory usage detected"
+      description: "Memory usage is {{ $value | humanizePercentage }} which is critically high (>95%)"
+      runbook_url: "https://docs.orthanc-bridge.local/runbooks/critical-memory"
+
+  # Webhook Security Alerts
+  - alert: HighWebhookFailures
+    expr: rate(orthanc_bridge_webhooks_received_total{status="failed"}[5m]) > 0.1
+    for: 3m
+    labels:
+      severity: warning
+      service: orthanc-bridge
+    annotations:
+      summary: "High webhook failure rate"
+      description: "Webhook failure rate is {{ $value | humanizePercentage }} over the last 5 minutes"
+      runbook_url: "https://docs.orthanc-bridge.local/runbooks/webhook-failures"
+
+  - alert: WebhookSecurityViolation
+    expr: increase(orthanc_bridge_webhooks_received_total{status="security_violation"}[1m]) > 5
+    for: 0s
+    labels:
+      severity: critical
+      service: orthanc-bridge
+    annotations:
+      summary: "Webhook security violations detected"
+      description: "{{ $value }} webhook security violations in the last minute - possible attack"
+      runbook_url: "https://docs.orthanc-bridge.local/runbooks/security-violations"
+
+  # Service Health Alerts
+  - alert: ServiceUnhealthy
+    expr: up{job="orthanc-bridge"} == 0
+    for: 1m
+    labels:
+      severity: critical
+      service: orthanc-bridge
+    annotations:
+      summary: "Orthanc Bridge service is down"
+      description: "The Orthanc Bridge service has been down for more than 1 minute"
+      runbook_url: "https://docs.orthanc-bridge.local/runbooks/service-down"
+
+  # Disk Space Alerts (if implemented)
+  - alert: LowDiskSpace
+    expr: orthanc_bridge_disk_usage_bytes > 0.8
+    for: 5m
+    labels:
+      severity: warning
+      service: orthanc-bridge
+    annotations:
+      summary: "Low disk space"
+      description: "Disk usage is above 80% threshold"
+      runbook_url: "https://docs.orthanc-bridge.local/runbooks/low-disk-space"

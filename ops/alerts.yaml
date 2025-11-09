@@ -1,0 +1,319 @@
+# Alert Rules for Unified Reporting System
+# Format: Prometheus/Alertmanager compatible
+
+groups:
+  - name: autosave_alerts
+    interval: 30s
+    rules:
+      - alert: AutosaveSuccessRateLow
+        expr: |
+          (
+            sum(rate(autosave_success_total[5m])) 
+            / 
+            sum(rate(autosave_attempt_total[5m]))
+          ) < 0.99
+        for: 10m
+        labels:
+          severity: critical
+          component: autosave
+          slo: autosave_reliability
+        annotations:
+          summary: "Autosave success rate below 99%"
+          description: "Autosave success rate is {{ $value | humanizePercentage }} (threshold: 99%)"
+          runbook: "https://docs.example.com/runbooks/autosave-failures"
+          action: "Page on-call engineer immediately"
+
+      - alert: AutosaveLatencyHigh
+        expr: |
+          histogram_quantile(0.95, 
+            sum(rate(autosave_latency_bucket[5m])) by (le)
+          ) > 1500
+        for: 10m
+        labels:
+          severity: warning
+          component: autosave
+          slo: autosave_latency
+        annotations:
+          summary: "Autosave p95 latency above 1.5s"
+          description: "Autosave p95 latency is {{ $value }}ms (threshold: 1500ms)"
+          runbook: "https://docs.example.com/runbooks/autosave-latency"
+          action: "Investigate performance issues"
+
+      - alert: AutosaveErrorBudgetExhausted
+        expr: |
+          (
+            1 - (
+              sum(rate(autosave_success_total[5m])) 
+              / 
+              sum(rate(autosave_attempt_total[5m]))
+            )
+          ) / 0.005 > 1
+        for: 5m
+        labels:
+          severity: critical
+          component: autosave
+          slo: error_budget
+        annotations:
+          summary: "Autosave error budget exhausted"
+          description: "Error budget consumption: {{ $value | humanizePercentage }}"
+          runbook: "https://docs.example.com/runbooks/error-budget"
+          action: "Freeze deployments, focus on reliability"
+
+  - name: report_operations_alerts
+    interval: 1m
+    rules:
+      - alert: ReportFinalizeFailureRate
+        expr: |
+          (
+            sum(rate(report_finalize_failure_total[1h])) 
+            / 
+            sum(rate(report_finalize_attempt_total[1h]))
+          ) > 0.001
+        for: 15m
+        labels:
+          severity: critical
+          component: reporting
+          slo: finalize_success
+        annotations:
+          summary: "Report finalization failure rate above 0.1%"
+          description: "Finalize failure rate: {{ $value | humanizePercentage }}"
+          runbook: "https://docs.example.com/runbooks/finalize-failures"
+
+      - alert: ReportSignFailureRate
+        expr: |
+          (
+            sum(rate(report_sign_failure_total[1h])) 
+            / 
+            sum(rate(report_sign_attempt_total[1h]))
+          ) > 0.001
+        for: 15m
+        labels:
+          severity: critical
+          component: reporting
+          slo: sign_success
+        annotations:
+          summary: "Report signature failure rate above 0.1%"
+          description: "Sign failure rate: {{ $value | humanizePercentage }}"
+          runbook: "https://docs.example.com/runbooks/sign-failures"
+
+      - alert: ExportFailureRateHigh
+        expr: |
+          (
+            sum(rate(report_export_failure_total[1h])) 
+            / 
+            sum(rate(report_export_attempt_total[1h]))
+          ) > 0.01
+        for: 30m
+        labels:
+          severity: warning
+          component: reporting
+          slo: export_success
+        annotations:
+          summary: "Report export failure rate above 1%"
+          description: "Export failure rate: {{ $value | humanizePercentage }}"
+          runbook: "https://docs.example.com/runbooks/export-failures"
+
+  - name: version_conflict_alerts
+    interval: 1m
+    rules:
+      - alert: VersionConflictSpike
+        expr: |
+          rate(version_conflict_total[5m]) 
+          > 
+          3 * avg_over_time(rate(version_conflict_total[5m])[1h:5m])
+        for: 10m
+        labels:
+          severity: warning
+          component: reporting
+        annotations:
+          summary: "Version conflict rate 3x above baseline"
+          description: "Current rate: {{ $value }}, baseline: {{ $value | humanize }}"
+          runbook: "https://docs.example.com/runbooks/version-conflicts"
+          action: "Check for concurrent editing issues"
+
+  - name: api_alerts
+    interval: 30s
+    rules:
+      - alert: APIErrorRateHigh
+        expr: |
+          (
+            sum(rate(api_error_total[5m])) 
+            / 
+            sum(rate(api_request_total[5m]))
+          ) > 0.02
+        for: 5m
+        labels:
+          severity: critical
+          component: api
+          slo: api_availability
+        annotations:
+          summary: "API error rate above 2%"
+          description: "Error rate: {{ $value | humanizePercentage }}"
+          runbook: "https://docs.example.com/runbooks/api-errors"
+          action: "Page on-call immediately"
+
+      - alert: APILatencyHigh
+        expr: |
+          histogram_quantile(0.95, 
+            sum(rate(api_latency_bucket[5m])) by (le, endpoint)
+          ) > 2000
+        for: 10m
+        labels:
+          severity: warning
+          component: api
+        annotations:
+          summary: "API p95 latency above 2s"
+          description: "Endpoint {{ $labels.endpoint }} latency: {{ $value }}ms"
+          runbook: "https://docs.example.com/runbooks/api-latency"
+
+      - alert: APIDown
+        expr: up{job="api-server"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          component: api
+        annotations:
+          summary: "API server is down"
+          description: "API server {{ $labels.instance }} is unreachable"
+          runbook: "https://docs.example.com/runbooks/api-down"
+          action: "Page on-call immediately, check server health"
+
+  - name: ui_alerts
+    interval: 1m
+    rules:
+      - alert: EditorCrashRateHigh
+        expr: |
+          (
+            sum(rate(editor_crash_total[24h])) 
+            / 
+            sum(rate(editor_session_total[24h]))
+          ) > 0.001
+        for: 1h
+        labels:
+          severity: warning
+          component: ui
+          slo: editor_crash_rate
+        annotations:
+          summary: "Editor crash rate above 0.1%"
+          description: "Crash rate: {{ $value | humanizePercentage }}"
+          runbook: "https://docs.example.com/runbooks/editor-crashes"
+
+      - alert: PageLoadTimeSlow
+        expr: |
+          histogram_quantile(0.95, 
+            sum(rate(page_load_time_bucket[5m])) by (le)
+          ) > 5000
+        for: 15m
+        labels:
+          severity: warning
+          component: ui
+        annotations:
+          summary: "Page load time p95 above 5s"
+          description: "Load time: {{ $value }}ms"
+          runbook: "https://docs.example.com/runbooks/slow-page-load"
+
+  - name: network_alerts
+    interval: 30s
+    rules:
+      - alert: HighOfflineRate
+        expr: |
+          (
+            sum(rate(network_offline_total[5m])) 
+            / 
+            sum(rate(network_event_total[5m]))
+          ) > 0.05
+        for: 10m
+        labels:
+          severity: warning
+          component: network
+        annotations:
+          summary: "High rate of offline events (>5%)"
+          description: "Offline rate: {{ $value | humanizePercentage }}"
+          runbook: "https://docs.example.com/runbooks/network-issues"
+
+  - name: burn_rate_alerts
+    interval: 1m
+    rules:
+      - alert: FastBurnRate
+        expr: |
+          (
+            sum(rate(autosave_failure_total[5m])) 
+            / 
+            sum(rate(autosave_attempt_total[5m]))
+          ) > 0.01
+        for: 5m
+        labels:
+          severity: critical
+          component: slo
+          burn_rate: fast
+        annotations:
+          summary: "Error budget burning at 10x rate"
+          description: "Current error rate: {{ $value | humanizePercentage }} (normal: 0.1%)"
+          runbook: "https://docs.example.com/runbooks/fast-burn"
+          action: "Immediate investigation required"
+
+      - alert: ModerateBurnRate
+        expr: |
+          (
+            sum(rate(autosave_failure_total[5m])) 
+            / 
+            sum(rate(autosave_attempt_total[5m]))
+          ) > 0.003
+        for: 15m
+        labels:
+          severity: warning
+          component: slo
+          burn_rate: moderate
+        annotations:
+          summary: "Error budget burning at 3x rate"
+          description: "Current error rate: {{ $value | humanizePercentage }} (normal: 0.1%)"
+          runbook: "https://docs.example.com/runbooks/moderate-burn"
+          action: "Investigate within 1 hour"
+
+# Notification routing
+route:
+  receiver: 'default'
+  group_by: ['alertname', 'severity']
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 4h
+  
+  routes:
+    - match:
+        severity: critical
+      receiver: 'pagerduty'
+      continue: true
+    
+    - match:
+        severity: warning
+      receiver: 'slack'
+    
+    - match:
+        severity: info
+      receiver: 'email'
+
+# Receivers
+receivers:
+  - name: 'default'
+    webhook_configs:
+      - url: 'http://localhost:9093/webhook'
+  
+  - name: 'pagerduty'
+    pagerduty_configs:
+      - service_key: '<PAGERDUTY_SERVICE_KEY>'
+        description: '{{ .GroupLabels.alertname }}: {{ .CommonAnnotations.summary }}'
+  
+  - name: 'slack'
+    slack_configs:
+      - api_url: '<SLACK_WEBHOOK_URL>'
+        channel: '#alerts-reporting'
+        title: '{{ .GroupLabels.alertname }}'
+        text: '{{ .CommonAnnotations.description }}'
+  
+  - name: 'email'
+    email_configs:
+      - to: 'team@example.com'
+        from: 'alerts@example.com'
+        smarthost: 'smtp.example.com:587'
+        auth_username: 'alerts@example.com'
+        auth_password: '<EMAIL_PASSWORD>'
