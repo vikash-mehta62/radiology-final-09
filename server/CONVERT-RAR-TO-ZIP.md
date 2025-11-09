@@ -140,7 +140,7 @@ Before uploading, verify:
 ### 4. Upload
 
 ```bash
-curl -X POST http://localhost:8001/api/dicom/upload/zip \
+curl -X POST http://3.144.196.75:8001/api/dicom/upload/zip \
   -F "file=@dicom-study.zip"
 ```
 
@@ -281,5 +281,5 @@ unrar x file.rar
 zip -r output.zip extracted-folder/
 
 # Upload
-curl -X POST http://localhost:8001/api/dicom/upload/zip -F "file=@output.zip"
+curl -X POST http://3.144.196.75:8001/api/dicom/upload/zip -F "file=@output.zip"
 ```

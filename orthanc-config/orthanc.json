@@ -106,7 +106,7 @@
     "function OnStoredInstance(instanceId, tags, metadata, origin)",
     "  -- Auto-sync to your application database",
     "  -- Automatically processes files when uploaded to Orthanc",
-    "  local webhook_url = 'http://localhost:8001/api/orthanc/new-instance'",
+    "  local webhook_url = 'http://3.144.196.75:8001/api/orthanc/new-instance'",
     "  local webhook_secret = 'webhook_secret_2024_change_in_prod'",
     "  ",
     "  -- Prepare payload with instance metadata",

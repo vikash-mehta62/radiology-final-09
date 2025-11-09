@@ -112,7 +112,7 @@ npm run test:security:compliance
 npm run security:audit
 
 # With custom configuration
-API_BASE_URL=http://localhost:8001 \
+API_BASE_URL=http://3.144.196.75:8001 \
 TEST_USERNAME=admin \
 TEST_PASSWORD=admin123 \
 npm run security:audit

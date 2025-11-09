@@ -11,7 +11,7 @@ RED='\033[0;31m'
 NC='\033[0m'
 
 # Configuration
-API_URL="${API_URL:-http://localhost:8001}"
+API_URL="${API_URL:-http://3.144.196.75:8001}"
 TIMEOUT=10
 FAILURES=0
 

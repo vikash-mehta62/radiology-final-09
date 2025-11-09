@@ -3853,7 +3853,7 @@ export const MedicalImageViewer: React.FC<MedicalImageViewerProps> = ({
     try {
       console.log(`📥 Downloading report: ${downloadReportId}`)
 
-      const downloadResponse = await fetch(`http://localhost:8001/api/ai/report/${downloadReportId}/download`)
+      const downloadResponse = await fetch(`http://3.144.196.75:8001/api/ai/report/${downloadReportId}/download`)
 
       if (!downloadResponse.ok) {
         throw new Error(`Download failed: ${downloadResponse.status}`)
@@ -3896,7 +3896,7 @@ export const MedicalImageViewer: React.FC<MedicalImageViewerProps> = ({
     setSliceAnalysisStatus(prev => new Map(prev).set(frameIndex, 'analyzing'))
 
     try {
-      const response = await fetch('http://localhost:8001/api/ai/analyze', {
+      const response = await fetch('http://3.144.196.75:8001/api/ai/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -3975,7 +3975,7 @@ export const MedicalImageViewer: React.FC<MedicalImageViewerProps> = ({
         }
       }
 
-      const reportResponse = await fetch('http://localhost:8001/api/ai/report/consolidated', {
+      const reportResponse = await fetch('http://3.144.196.75:8001/api/ai/report/consolidated', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

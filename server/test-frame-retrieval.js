@@ -88,7 +88,7 @@ async function testFrameRetrieval() {
     // 5. Test via Node.js API endpoint
     console.log('\n🌐 Testing via Node.js API endpoint...\n');
 
-    const nodeServerUrl = process.env.NODE_SERVER_URL || 'http://localhost:8001';
+    const nodeServerUrl = process.env.NODE_SERVER_URL || 'http://3.144.196.75:8001';
 
     for (let i = 0; i < Math.min(instances.length, 3); i++) {
       try {

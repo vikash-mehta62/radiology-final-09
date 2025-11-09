@@ -81,7 +81,7 @@ const FHIRExportButton: React.FC<FHIRExportButtonProps> = ({
       setError(null);
 
       const response = await axios.get(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:8001'}/api/fhir/reports/${reportId}/status`,
+        `${import.meta.env.VITE_API_URL || 'http://3.144.196.75:8001'}/api/fhir/reports/${reportId}/status`,
         { headers: getAuthHeaders() }
       );
 
@@ -102,7 +102,7 @@ const FHIRExportButton: React.FC<FHIRExportButtonProps> = ({
       handleClose();
 
       const response = await axios.get(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:8001'}/api/fhir/reports/${reportId}/download?format=${format}`,
+        `${import.meta.env.VITE_API_URL || 'http://3.144.196.75:8001'}/api/fhir/reports/${reportId}/download?format=${format}`,
         {
           headers: getAuthHeaders(),
           responseType: 'blob'
@@ -137,7 +137,7 @@ const FHIRExportButton: React.FC<FHIRExportButtonProps> = ({
       setError(null);
 
       const response = await axios.post(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:8001'}/api/fhir/reports/${reportId}/push`,
+        `${import.meta.env.VITE_API_URL || 'http://3.144.196.75:8001'}/api/fhir/reports/${reportId}/push`,
         { serverUrl, format },
         { headers: getAuthHeaders() }
       );

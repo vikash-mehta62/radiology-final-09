@@ -31,7 +31,7 @@ npm test -- tests/security/compliance-validation.test.js
 node run-security-audit.js
 
 # With custom configuration
-API_BASE_URL=http://localhost:8001 \
+API_BASE_URL=http://3.144.196.75:8001 \
 TEST_USERNAME=admin \
 TEST_PASSWORD=admin123 \
 node run-security-audit.js
@@ -41,7 +41,7 @@ node run-security-audit.js
 
 ```bash
 # Test specific vulnerability
-node -e "const { testNoSQLInjection } = require('./src/utils/security-testing'); testNoSQLInjection('http://localhost:8001', '/api/auth/login').then(console.log);"
+node -e "const { testNoSQLInjection } = require('./src/utils/security-testing'); testNoSQLInjection('http://3.144.196.75:8001', '/api/auth/login').then(console.log);"
 ```
 
 ## Test Categories

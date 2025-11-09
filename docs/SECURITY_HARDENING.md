@@ -179,7 +179,7 @@ node server/src/scripts/run-security-audit.js
 ```javascript
 const { runSecurityAudit } = require('./utils/security-testing');
 
-const results = await runSecurityAudit('http://localhost:8001', {
+const results = await runSecurityAudit('http://3.144.196.75:8001', {
   endpoints: ['/api/users', '/api/reports'],
   authHeaders: { Authorization: 'Bearer token' }
 });
@@ -392,20 +392,20 @@ ALERTS_ENABLED=true
 
 ```bash
 # Test NoSQL injection protection
-curl -X POST http://localhost:8001/api/auth/login \
+curl -X POST http://3.144.196.75:8001/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"username": {"$ne": null}, "password": {"$ne": null}}'
 # Expected: 400 Bad Request (blocked)
 
 # Test XSS protection
-curl -X POST http://localhost:8001/api/reports \
+curl -X POST http://3.144.196.75:8001/api/reports \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <token>" \
   -d '{"findings": "<script>alert(\"XSS\")</script>"}'
 # Expected: Script tags removed/escaped
 
 # Test CSRF protection
-curl -X POST http://localhost:8001/api/reports \
+curl -X POST http://3.144.196.75:8001/api/reports \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <token>" \
   -d '{"findings": "Test"}'

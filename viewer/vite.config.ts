@@ -69,7 +69,7 @@ export default defineConfig({
     ],
     proxy: {
       '/api': {
-        target: 'http://localhost:8001',
+        target: 'http://3.144.196.75:8001',
         changeOrigin: true,
         secure: false,
         ws: true,
@@ -78,7 +78,7 @@ export default defineConfig({
             console.error('❌ Proxy error:', err.message);
           });
           proxy.on('proxyReq', (proxyReq, req, _res) => {
-            console.log(`🔄 Proxying: ${req.method} ${req.url} → ${process.env.VITE_BACKEND_URL || 'http://localhost:8001'}${req.url}`);
+            console.log(`🔄 Proxying: ${req.method} ${req.url} → ${process.env.VITE_BACKEND_URL || 'http://3.144.196.75:8001'}${req.url}`);
           });
           proxy.on('proxyRes', (proxyRes, req, _res) => {
             const status = proxyRes.statusCode;
@@ -88,7 +88,7 @@ export default defineConfig({
         }
       },
       '/auth': {
-        target: 'http://localhost:8001',
+        target: 'http://3.144.196.75:8001',
         changeOrigin: true,
         secure: false,
       },

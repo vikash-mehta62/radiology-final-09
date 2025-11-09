@@ -240,7 +240,7 @@ const OrthancViewerPage: React.FC = () => {
               </Button>
               <Button
                 variant="outlined"
-                onClick={() => window.open('http://localhost:8001/pacs-upload', '_blank')}
+                onClick={() => window.open('http://3.144.196.75:8001/pacs-upload', '_blank')}
               >
                 Upload Files
               </Button>

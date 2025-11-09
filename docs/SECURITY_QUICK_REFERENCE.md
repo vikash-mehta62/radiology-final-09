@@ -250,18 +250,18 @@ npm run security:audit
 
 ```bash
 # Test NoSQL injection
-curl -X POST http://localhost:8001/api/auth/login \
+curl -X POST http://3.144.196.75:8001/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"username": {"$ne": null}, "password": {"$ne": null}}'
 
 # Test XSS
-curl -X POST http://localhost:8001/api/reports \
+curl -X POST http://3.144.196.75:8001/api/reports \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <token>" \
   -d '{"findings": "<script>alert(\"XSS\")</script>"}'
 
 # Test CSRF
-curl -X POST http://localhost:8001/api/reports \
+curl -X POST http://3.144.196.75:8001/api/reports \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <token>" \
   -d '{"findings": "Test"}'

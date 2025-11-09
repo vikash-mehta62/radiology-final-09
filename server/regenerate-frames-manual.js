@@ -164,5 +164,5 @@ console.log('══════════════════════�
 console.log(`✅ Generated ${generatedFrames} frames out of ${parsedFiles.length} total`);
 console.log('');
 console.log('Test frame URL:');
-console.log(`http://localhost:8001/api/dicom/studies/${studyUID}/frames/0`);
+console.log(`http://3.144.196.75:8001/api/dicom/studies/${studyUID}/frames/0`);
 console.log('');

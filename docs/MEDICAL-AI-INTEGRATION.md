@@ -384,7 +384,7 @@ deploy:
 npm run test:ai
 
 # Test specific model
-curl -X POST http://localhost:8001/api/medical-ai/classify-image \
+curl -X POST http://3.144.196.75:8001/api/medical-ai/classify-image \
   -H "Content-Type: application/json" \
   -d '{"studyInstanceUID": "1.2.3.4.5", "frameIndex": 0}'
 ```
@@ -395,10 +395,10 @@ curl -X POST http://localhost:8001/api/medical-ai/classify-image \
 
 ```bash
 # Check AI service health
-curl http://localhost:8001/api/medical-ai/health
+curl http://3.144.196.75:8001/api/medical-ai/health
 
 # View AI analysis for a study
-curl http://localhost:8001/api/medical-ai/study/1.2.3.4.5/analysis
+curl http://3.144.196.75:8001/api/medical-ai/study/1.2.3.4.5/analysis
 ```
 
 ---

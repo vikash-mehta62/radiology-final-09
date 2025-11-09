@@ -190,7 +190,7 @@ interface AIDetection {
 const API_URL = import.meta.env.VITE_API_URL || (
   process.env.NODE_ENV === 'production' 
     ? window.location.origin 
-    : 'http://localhost:8001'
+    : 'http://3.144.196.75:8001'
 );
 
 const getAuthToken = (): string | null => {

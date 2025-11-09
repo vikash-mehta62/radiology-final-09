@@ -9,7 +9,7 @@ const path = require('path');
 const { runSecurityAudit, generateSecurityReport } = require('../utils/security-testing');
 
 async function main() {
-  const baseUrl = process.env.API_BASE_URL || 'http://localhost:8001';
+  const baseUrl = process.env.API_BASE_URL || 'http://3.144.196.75:8001';
   
   console.log('🔒 Medical Imaging System - Security Audit');
   console.log('==========================================\n');

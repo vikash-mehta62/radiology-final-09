@@ -90,7 +90,7 @@ class AutoAnalysisService {
         throw new Error('Authentication required');
       }
 
-      const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:8001';
+      const backendUrl = import.meta.env.VITE_API_URL || 'http://3.144.196.75:8001';
       
       const analysisResponse = await fetch(`${backendUrl}/api/ai/analyze`, {
         method: 'POST',
@@ -859,7 +859,7 @@ class AutoAnalysisService {
 
     try {
       const token = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
-      const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:8001';
+      const backendUrl = import.meta.env.VITE_API_URL || 'http://3.144.196.75:8001';
       
       const healthResponse = await fetch(`${backendUrl}/api/medical-ai/health`, {
         method: 'GET',

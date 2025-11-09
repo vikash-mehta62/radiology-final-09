@@ -67,7 +67,7 @@ const StructuredReportViewer: React.FC<StructuredReportViewerProps> = ({
 
       // Fetch SR metadata from Orthanc
       const response = await fetch(
-        `http://localhost:8001/api/dicom/instances/${instanceId}/metadata`
+        `http://3.144.196.75:8001/api/dicom/instances/${instanceId}/metadata`
       );
 
       if (!response.ok) {

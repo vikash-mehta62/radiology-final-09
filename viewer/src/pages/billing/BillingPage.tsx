@@ -34,7 +34,7 @@ import {
 import axios from 'axios';
 import { getAuthToken } from '@/services/ApiService';
 
-const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8001';
+const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://3.144.196.75:8001';
 
 const axiosClient = axios.create({
   baseURL: backendUrl,

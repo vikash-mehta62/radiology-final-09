@@ -27,9 +27,9 @@ async function testUpload() {
     form.append('patientID', 'test');
     form.append('patientName', 'Test Patient');
     
-    console.log('Uploading to http://localhost:8001/api/upload...\n');
+    console.log('Uploading to http://3.144.196.75:8001/api/upload...\n');
     
-    const response = await axios.post('http://localhost:8001/api/upload', form, {
+    const response = await axios.post('http://3.144.196.75:8001/api/upload', form, {
       headers: form.getHeaders(),
       maxContentLength: Infinity,
       maxBodyLength: Infinity

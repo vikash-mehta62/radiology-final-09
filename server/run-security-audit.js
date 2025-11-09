@@ -9,7 +9,7 @@ const path = require('path');
 
 // Configuration
 const config = {
-  baseUrl: process.env.API_BASE_URL || 'http://localhost:8001',
+  baseUrl: process.env.API_BASE_URL || 'http://3.144.196.75:8001',
   endpoints: [
     '/api/auth/login',
     '/api/auth/register',
